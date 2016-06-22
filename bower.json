@@ -1,0 +1,22 @@
+{
+  "name": "template-builder",
+  "homepage": "https://github.com/thachnv/template-builder",
+  "authors": [
+    "Thach Nguyen <thachnv45@gmail.com>"
+  ],
+  "description": "A template builder using fabric",
+  "main": "js/app.js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "fabric.js": "fabric#^1.6.2",
+    "bootstrap": "^3.3.6",
+    "jquery": "^2.2.4"
+  }
+}
