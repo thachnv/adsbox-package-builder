@@ -4,6 +4,7 @@ import '../../bower_components/bootstrap/dist/js/bootstrap.js';
 import '../../bower_components/fabric.js/dist/fabric.js';
 import '../less/app.less';
 import '../index.html';
+import '../assets/video-player.svg';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TemplateBuilderApp from './components/TemplateBuilderApp/TemplateBuilderApp.js';

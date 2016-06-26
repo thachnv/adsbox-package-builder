@@ -1,16 +1,23 @@
 import React from 'react';
-import {TEXT_PROPS} from '../../constant.js';
 export default class TextProperties extends React.Component {
   constructor() {
     super();
     this.state = {
       text: '',
       fontFamily: '',
-      fontWeight: 'bold',
       fill: '',
       fontSize: 10,
-      fontStyle: 'italic'
+      italic: false,
+      bold: false,
     };
+  }
+
+  componentWillMount() {
+    this.setState(this.getTextProps(this.props.textProps));
+  }
+
+  componentWillReceiveProps(props) {
+    this.setState(this.getTextProps(props.textProps));
   }
 
   getTextProps(object) {
@@ -21,15 +28,7 @@ export default class TextProperties extends React.Component {
       fontSize: object.fontSize,
       italic: object.fontStyle === 'italic',
       bold: object.fontWeight === 'bold',
-    }
-  }
-
-  componentDidMount() {
-    this.setState(this.getTextProps(this.props.textProps));
-  }
-
-  componentWillReceiveProps(props) {
-    this.setState(this.getTextProps(props.textProps));
+    };
   }
 
   handleCheckBoxChange(key, e) {
@@ -70,57 +69,63 @@ export default class TextProperties extends React.Component {
 
   render() {
     return (
-      <div className="text-properties">
-        <form className="form-horizontal">
-          <div className="form-group">
-            <label className="control-label col-xs-2">Text</label>
-            <div className="col-xs-10">
-              <input className="form-control" value={this.state.text}
-                     onChange={this.handleTextChange.bind(this, 'text')}/>
-            </div>
-          </div>
-          <div className="form-group">
-            <label className="control-label col-xs-2">Font</label>
-            <div className="col-xs-10">
-              <input className="form-control" value={this.state.fontFamily}
-                     onChange={this.handleTextChange.bind(this, 'fontFamily')}/>
-            </div>
-          </div>
-          <div className="form-group">
-            <label className="control-label col-xs-2">Color</label>
-            <div className="col-xs-10">
-              <input className="form-control" value={this.state.fill}
-                     onChange={this.handleTextChange.bind(this, 'fill')}/>
-            </div>
-          </div>
-          <div className="form-group">
-            <label className="control-label col-xs-2">Size</label>
-            <div className="col-xs-10">
-              <input type="number" value={this.state.fontSize} onChange={this.handleTextChange.bind(this, 'fontSize')}
-                     className="form-control"/>
-            </div>
-          </div>
-          <div className="form-group">
-            <div className="col-xs-offset-2 col-xs-10">
-              <div className="checkbox">
-                <label>
-                  <input type="checkbox" onChange={this.handleCheckBoxChange.bind(this, 'bold')}
-                         checked={this.state.bold}/> Bold
-                </label>
+      <div className="panel panel-info">
+        <div className="panel-heading">Text Properties</div>
+        <div className="panel-body">
+          <div className="text-properties">
+            <form className="form-horizontal">
+              <div className="form-group">
+                <label className="control-label col-xs-2">Text</label>
+                <div className="col-xs-10">
+                  <input className="form-control" value={this.state.text}
+                         onChange={this.handleTextChange.bind(this, 'text')}/>
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="form-group">
-            <div className="col-xs-offset-2 col-xs-10">
-              <div className="checkbox">
-                <label>
-                  <input type="checkbox" onChange={this.handleCheckBoxChange.bind(this, 'italic')}
-                         checked={this.state.italic}/> Italic
-                </label>
+              <div className="form-group">
+                <label className="control-label col-xs-2">Font</label>
+                <div className="col-xs-10">
+                  <input className="form-control" value={this.state.fontFamily}
+                         onChange={this.handleTextChange.bind(this, 'fontFamily')}/>
+                </div>
               </div>
-            </div>
+              <div className="form-group">
+                <label className="control-label col-xs-2">Color</label>
+                <div className="col-xs-10">
+                  <input type="color" value={this.state.fill}
+                         onChange={this.handleTextChange.bind(this, 'fill')}/>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="control-label col-xs-2">Size</label>
+                <div className="col-xs-10">
+                  <input type="number" value={this.state.fontSize}
+                         onChange={this.handleTextChange.bind(this, 'fontSize')}
+                         className="form-control"/>
+                </div>
+              </div>
+              <div className="form-group">
+                <div className="col-xs-offset-2 col-xs-10">
+                  <div className="checkbox">
+                    <label>
+                      <input type="checkbox" onChange={this.handleCheckBoxChange.bind(this, 'bold')}
+                             checked={this.state.bold}/> Bold
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div className="form-group">
+                <div className="col-xs-offset-2 col-xs-10">
+                  <div className="checkbox">
+                    <label>
+                      <input type="checkbox" onChange={this.handleCheckBoxChange.bind(this, 'italic')}
+                             checked={this.state.italic}/> Italic
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
       </div>
     );
   }

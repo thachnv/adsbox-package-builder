@@ -1,8 +1,19 @@
-export const TEXT_PROPS = {
-  FONT_SIZE: 'fontSize',
-  FONT_COLOR: 'fill',
-  FONT_WEIGHT: 'fontWeight',
-  FONT: 'fontFamily',
-  FONT_STYLE: 'fontStyle',
-  TEXT: 'text'
+export const SCALING_STYLES = {
+  FULL: 'full',
+  FIT: 'fit',
+  FREE: 'free',
 };
+
+export const ARRANGEMENT = {
+  CENTER_TOP: 'centertop',
+  CENTER_BOTTOM: 'centerbottom',
+  MIDDLE_LEFT: 'middleleft',
+  MIDDLE_RIGHT: 'middleright',
+  CENTER_MIDDLE: 'centermiddle',
+};
+
+export const SCALING_STYLE_BUTTONS = [
+  {label: 'Full', key: SCALING_STYLES.FULL},
+  {label: 'Fit', key: SCALING_STYLES.FIT},
+  {label: 'Free', key: SCALING_STYLES.FREE},
+];

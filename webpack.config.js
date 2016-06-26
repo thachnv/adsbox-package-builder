@@ -20,6 +20,10 @@ module.exports = {
         loaders: ['react-hot','babel'],
       },
       {
+        test: /\.svg$/,
+        loader: 'file-loader?name=assets/[name].[ext]',
+      },
+      {
         test: /\.less$/,
         exclude: /node_modules/,
         loaders: ['style-loader', 'css-loader', 'less-loader', 'postcss-loader'],
@@ -38,7 +42,7 @@ module.exports = {
       { test: /\.woff2(\?\S*)?/, loader: 'url-loader?name=assets/[name].[ext]&imit=100000&mimetype=application/font-woff2' },
       { test: /\.woff(\?\S*)?/, loader: 'url-loader?name=assets/[name].[ext]&limit=100000&mimetype=application/font-woff' },
       { test: /\.ttf(\?\S*)?/, loader: 'url-loader?name=assets/[name].[ext]&limit=100000&mimetype=application/font-ttf' },
-      { test: /\.svg(\?\S*)?/, loader: 'url-loader?name=assets/[name].[ext]&limit=100000&mimetype=application/font-svg' },
+      // { test: /\.svg(\?\S*)?/, loader: 'url-loader?name=assets/[name].[ext]&limit=100000&mimetype=application/font-svg' },
     ]
   },
   devtool: 'source-map',
