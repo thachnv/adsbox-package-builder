@@ -30,7 +30,7 @@ export default class VideoProperties extends React.Component {
     this.setState({
       scalingStyle: value,
     });
-    this.props.updateTo('scalingStyle', value);
+    this.props.updateTo(value);
   }
 
   render() {
@@ -41,8 +41,8 @@ export default class VideoProperties extends React.Component {
           <div className="video-properties">
             <form className="form-horizontal">
               <div className="form-group">
-                <label className="control-label col-xs-2">Scaling Style</label>
-                <div className="col-xs-10">
+                <label className="control-label col-xs-3">Scaling Style</label>
+                <div className="col-xs-9">
                   {this.scalingStyleButtons.map((button) => {
                     const classes = ['btn', 'btn-default'];
                     if (button.key === this.state.scalingStyle) {
@@ -53,13 +53,6 @@ export default class VideoProperties extends React.Component {
                   })}
                 </div>
               </div>
-              <div className="form-group">
-                <div className="col-xs-offset-2 col-xs-10">
-                  <button onClick={this.props.clickPlay.bind(this)} type="button" className="btn btn-primary">Play
-                  </button>
-                </div>
-              </div>
-
             </form>
           </div>
         </div>

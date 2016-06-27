@@ -17,7 +17,7 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /(node_modules|bower_components)/,
-        loaders: ['react-hot','babel'],
+        loaders: ['react-hot', 'babel'],
       },
       {
         test: /\.svg$/,
@@ -38,11 +38,20 @@ module.exports = {
         exclude: /node_modules/,
         loader: 'file-loader?name=[name].[ext]',
       },
-      { test: /\.eot(\?\S*)?/, loader: 'url-loader?name=assets/[name].[ext]&limit=100000&mimetype=application/vnd.ms-fontobject' },
-      { test: /\.woff2(\?\S*)?/, loader: 'url-loader?name=assets/[name].[ext]&imit=100000&mimetype=application/font-woff2' },
-      { test: /\.woff(\?\S*)?/, loader: 'url-loader?name=assets/[name].[ext]&limit=100000&mimetype=application/font-woff' },
-      { test: /\.ttf(\?\S*)?/, loader: 'url-loader?name=assets/[name].[ext]&limit=100000&mimetype=application/font-ttf' },
-      // { test: /\.svg(\?\S*)?/, loader: 'url-loader?name=assets/[name].[ext]&limit=100000&mimetype=application/font-svg' },
+      {
+        test: /\.eot(\?\S*)?/,
+        loader: 'url-loader?name=assets/[name].[ext]&limit=100000&mimetype=application/vnd.ms-fontobject'
+      },
+      {
+        test: /\.woff2(\?\S*)?/,
+        loader: 'url-loader?name=assets/[name].[ext]&imit=100000&mimetype=application/font-woff2'
+      },
+      {
+        test: /\.woff(\?\S*)?/,
+        loader: 'url-loader?name=assets/[name].[ext]&limit=100000&mimetype=application/font-woff'
+      },
+      {test: /\.ttf(\?\S*)?/, loader: 'url-loader?name=assets/[name].[ext]&limit=100000&mimetype=application/font-ttf'},
+      {test: /\.svg(\?\S*)?/, loader: 'url-loader?name=assets/[name].[ext]&limit=100000&mimetype=application/font-svg'},
     ]
   },
   devtool: 'source-map',

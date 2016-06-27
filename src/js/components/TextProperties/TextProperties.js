@@ -10,6 +10,17 @@ export default class TextProperties extends React.Component {
       italic: false,
       bold: false,
     };
+    this.fonts = [
+      'Times New Roman',
+      'Arial',
+      'Courier New',
+      'Comic Sans MS',
+      'Impact',
+      'Tahoma',
+      'Trebuchet MS',
+      'Verdana',
+      'Courier New',
+    ];
   }
 
   componentWillMount() {
@@ -84,8 +95,13 @@ export default class TextProperties extends React.Component {
               <div className="form-group">
                 <label className="control-label col-xs-2">Font</label>
                 <div className="col-xs-10">
-                  <input className="form-control" value={this.state.fontFamily}
-                         onChange={this.handleTextChange.bind(this, 'fontFamily')}/>
+                  <select className="form-control" value={this.state.fontFamily} onChange={this.handleTextChange.bind(this, 'fontFamily')}>
+                    {this.fonts.map(font => {
+                      return (
+                        <option value={font}>{font}</option>
+                      );
+                    })}
+                  </select>
                 </div>
               </div>
               <div className="form-group">

@@ -1,10 +1,19 @@
 import React from 'react';
 import Video from '../../objects/Video.js';
+import Website from '../../objects/Website.js';
 import TextProperties from '../TextProperties/TextProperties.js';
 import ImageProperties from '../ImageProperties/ImageProperties.js';
 import VideoProperties from '../VideoProperties/VideoProperties.js';
+import WebProperties from '../WebProperties/WebProperties.js';
 import {Modal} from 'react-bootstrap';
-import {ARRANGEMENT} from '../../constant.js';
+import {ARRANGEMENT, SCALING_STYLES} from '../../constant.js';
+import classNames from 'classnames';
+
+const URL_TYPES = {
+  IMAGE: 'image',
+  VIDEO: 'video',
+  WEBSITE: 'website',
+};
 
 export default class TemplateBuilderApp extends React.Component {
   constructor() {
@@ -13,7 +22,8 @@ export default class TemplateBuilderApp extends React.Component {
     this.state = {
       activeProp: null,
       activePropType: null,
-      selectedArrangement: 'Center',
+      selectedArrangement: ARRANGEMENT.CENTER_MIDDLE,
+      isPreview: false,
     };
     this.activeObject = null;
     this.arrangementButtons = [
@@ -29,7 +39,6 @@ export default class TemplateBuilderApp extends React.Component {
     this.canvas = new fabric.Canvas(this.refs.mainCanvas);
     this.canvas.on('object:selected', this.getActiveObject.bind(this));
   }
-
 
   getActiveObject() {
     this.activeObject = this.canvas.getActiveObject();
@@ -54,79 +63,142 @@ export default class TemplateBuilderApp extends React.Component {
     this.setActiveProp(propName, value);
   }
 
-  updateScalingStyle(propName, value) {
-    if (propName === 'scalingStyle') {
-      if (value === 'full') {
-        const object = this.canvas.getActiveObject();
-        object.left = 0;
-        object.top = 0;
-        object.scaleX = this.canvas.width / object.width;
-        object.scaleY = this.canvas.height / object.height;
-        this.canvas.renderAll();
-        return;
-      }
-      if (value === 'fit') {
-        const object = this.canvas.getActiveObject();
-        object.scaleX = this.canvas.height / object.height;
-        object.scaleY = this.canvas.height / object.height;
-        this.toCenter(object);
-        this.toTop(object);
-        this.canvas.renderAll();
-      }
-      if (value === 'free') {
-        const object = this.canvas.getActiveObject();
-        object.scaleX = 1;
-        object.scaleY = 1;
-        this.canvas.renderAll();
-      }
+  updateWebsite(value) {
+    this.setActiveProp('url', value);
+  }
+
+  fitObject(object) {
+    const arrangement = object.arrangement;
+    let scale;
+    if (arrangement === ARRANGEMENT.CENTER_TOP) {
+      scale = (this.canvas.height / 2 ) / object.height; // should be original height, don't use getHeight()
+      object.set('scaleX', scale);
+      object.set('scaleY', scale);
+      this.toTop(object);
+      this.toCenter(object);
+    }
+    if (arrangement === ARRANGEMENT.CENTER_BOTTOM) {
+      scale = (this.canvas.height / 2 ) / object.height;
+      object.set('scaleX', scale);
+      object.set('scaleY', scale);
+      this.toBottom(object);
+      this.toCenter(object);
+    }
+    if (arrangement === ARRANGEMENT.MIDDLE_LEFT) {
+      scale = (this.canvas.width / 2 ) / object.width;
+      object.set('scaleX', scale);
+      object.set('scaleY', scale);
+      this.toLeft(object);
+      this.toMiddle(object);
+    }
+    if (arrangement === ARRANGEMENT.MIDDLE_RIGHT) {
+      scale = (this.canvas.width / 2 ) / object.width;
+      object.set('scaleX', scale);
+      object.set('scaleY', scale);
+      this.toRight(object);
+      this.toMiddle(object);
     }
   }
 
-  addVideo() {
-    const url = this.refs.inputUrl.value;
-    this.hideInputUrlDialog();
+  fullObject(object) {
+    const arrangement = object.arrangement;
+    if (arrangement === ARRANGEMENT.CENTER_TOP) {
+      const scaleX = this.canvas.width / object.width;
+      const scaleY = (this.canvas.height / 2 ) / object.height; // should be original height, don't use getHeight()
+      object.set('scaleX', scaleX);
+      object.set('scaleY', scaleY);
+      this.toTop(object);
+      this.toCenter(object);
+    }
+    if (arrangement === ARRANGEMENT.CENTER_BOTTOM) {
+      const scaleX = this.canvas.width / object.width;
+      const scaleY = (this.canvas.height / 2 ) / object.height; // should be original height, don't use getHeight()
+      object.set('scaleX', scaleX);
+      object.set('scaleY', scaleY);
+      this.toBottom(object);
+      this.toCenter(object);
+    }
+    if (arrangement === ARRANGEMENT.MIDDLE_LEFT) {
+      const scaleX = (this.canvas.width / 2 ) / object.width;
+      const scaleY = this.canvas.height / object.height;
+      object.set('scaleX', scaleX);
+      object.set('scaleY', scaleY);
+      this.toLeft(object);
+      this.toMiddle(object);
+    }
+    if (arrangement === ARRANGEMENT.MIDDLE_RIGHT) {
+      const scaleX = (this.canvas.width / 2 ) / object.width;
+      const scaleY = this.canvas.height / object.height;
+      object.set('scaleX', scaleX);
+      object.set('scaleY', scaleY);
+      this.toRight(object);
+      this.toMiddle(object);
+    }
+  }
 
-    const video1El = document.createElement('video');
+  applyScalingStyle(object) {
+    switch (object.scalingStyle) {
+      case SCALING_STYLES.FULL:
+        this.fullObject(object);
+        break;
+      case SCALING_STYLES.FIT:
+        this.fitObject(object);
+        break;
+      case SCALING_STYLES.FREE:
+        object.scaleX = 1;
+        object.scaleY = 1;
+        break;
+      default:
+        break;
+    }
+  }
 
-    const sourceMP4 = document.createElement('source');
-    sourceMP4.src = url;
-    video1El.appendChild(sourceMP4);
-    video1El.load();
-    video1El.addEventListener('loadeddata', () => {
-      video1El.width = video1El.videoWidth;
-      video1El.height = video1El.videoHeight;
-      const video1 = new Video(video1El, {
-        left: 0,
-        top: 0,
-        angle: 0,
-        centeredScaling: true,
-      });
-      this.canvas.add(video1);
-    });
+  updateScalingStyle(value) {
+    const object = this.canvas.getActiveObject();
+    if (object) {
+      object.scalingStyle = value;
+      this.applyScalingStyle(object);
+      object.setCoords();
+      this.canvas.renderAll();
+    }
   }
 
   toCenter(object) {
-    object.left = this.canvas.width / 2 - object.getWidth() / 2;
+    const _width = object.arrangement === ARRANGEMENT.MIDDLE_LEFT || object.arrangement === ARRANGEMENT.MIDDLE_RIGHT ?
+    this.canvas.width / 2 : this.canvas.width;
+    object.set('left', _width / 2);
   }
 
   toMiddle(object) {
-    object.top = this.canvas.height / 2 - object.getHeight() / 2;
+    const _height = object.arrangement === ARRANGEMENT.CENTER_TOP || object.arrangement === ARRANGEMENT.CENTER_BOTTOM ?
+    this.canvas.height / 2 : this.canvas.height;
+    object.set('top', _height / 2);
   }
 
   toLeft(object) {
-    object.left = 0;
+    object.set('left', object.getWidth() / 2);
   }
 
   toRight(object) {
-    object.set('left', this.canvas.width - object.getWidth());
+    object.set('left', this.canvas.width - object.getWidth() / 2);
   }
 
   toTop(object) {
-    object.set('top', 0);
+    object.set('top', object.getHeight() / 2);
   }
 
   toBottom(object) {
-    object.set('top', this.canvas.height - object.getHeight());
+    object.set('top', this.canvas.height - object.getHeight() / 2);
+  }
+
+  addText() {
+    const text = new fabric.Text('Click me to edit', {
+      originX: 'center',
+      originY: 'center',
+    });
+    this.toCenter(text);
+    this.toMiddle(text);
+    this.canvas.add(text);
   }
 
   addImage() {
@@ -134,16 +206,55 @@ export default class TemplateBuilderApp extends React.Component {
     this.hideInputUrlDialog();
     fabric.Image.fromURL(url, (image) => {
       image.set({
-        left: 0,
-        top: 0,
-        angle: 0,
         scalingStyle: 'free',
+        originX: 'center',
+        originY: 'center',
       });
-      this.toRight(image);
-      this.toBottom(image);
-      image.scale(1).setCoords();
-
+      this.toCenter(image);
+      this.toMiddle(image);
       this.canvas.add(image);
+    });
+  }
+
+  addVideo() {
+    const url = this.refs.inputUrl.value;
+    this.hideInputUrlDialog();
+
+    const videoElement = document.createElement('video');
+    const sourceMP4 = document.createElement('source');
+    sourceMP4.src = url;
+    videoElement.appendChild(sourceMP4);
+    videoElement.load();
+
+    videoElement.addEventListener('loadeddata', () => {
+      videoElement.width = videoElement.videoWidth;
+      videoElement.height = videoElement.videoHeight;
+      const video = new Video(videoElement, {
+        originX: 'center',
+        originY: 'center',
+        url: url,
+      });
+      this.toCenter(video);
+      this.toMiddle(video);
+      this.canvas.add(video);
+    });
+  }
+
+  addWebsite() {
+    const url = this.refs.inputUrl.value;
+    this.hideInputUrlDialog();
+
+    fabric.util.loadImage(url, (img) => {
+      const website = new Website(img);
+      website.set({
+        scalingStyle: 'free',
+        originX: 'center',
+        originY: 'center',
+        url: url,
+      });
+      this.toCenter(website);
+      this.toMiddle(website);
+      this.canvas.add(website);
     });
   }
 
@@ -155,9 +266,8 @@ export default class TemplateBuilderApp extends React.Component {
     this.setState({showModal: false});
   }
 
-  clickArrangement(value) {
-    const object = this.canvas.getActiveObject();
-    switch (value) {
+  applyArrangement(object) {
+    switch (object.arrangement) {
       case ARRANGEMENT.CENTER_MIDDLE:
         this.toCenter(object);
         this.toMiddle(object);
@@ -181,24 +291,57 @@ export default class TemplateBuilderApp extends React.Component {
       default:
         break;
     }
-    this.canvas.renderAll();
   }
 
-  playActiveVideo() {
+  updateArrangement(value) {
+    this.setState({
+      selectedArrangement: value,
+    });
     const object = this.canvas.getActiveObject();
-    const videoElement = object.getElement();
-    if (videoElement.paused) {
-      videoElement.play();
-    } else {
-      videoElement.pause();
+    if (object) {
+      object.arrangement = value;
+      this.applyArrangement(object);
+      this.applyScalingStyle(object);
+      object.setCoords();
+      this.canvas.renderAll();
     }
-    const self = this;
-    (function loop() {
-      if (!videoElement.paused || !videoElement.ended) {
-        self.canvas.renderAll();
-        setTimeout(loop, 1000 / 30); // drawing at 30fps
+  }
+
+  preview() {
+    if (this.state.isPreview) {
+      this.setState({
+        isPreview: false,
+      });
+      return;
+    }
+    this.setState({
+      isPreview: true,
+    });
+    this.canvas.getObjects().forEach(object => {
+      if (object.type === 'video') {
+        const videoElement = document.createElement('video');
+        const sourceMP4 = document.createElement('source');
+        sourceMP4.src = object.url;
+        videoElement.appendChild(sourceMP4);
+        videoElement.load();
+        videoElement.addEventListener('loadeddata', () => {
+          videoElement.loop = true;
+          videoElement.width = videoElement.videoWidth;
+          videoElement.height = videoElement.videoHeight;
+          object.setElement(videoElement);
+          videoElement.play();
+        });
       }
-    })();
+    });
+    setTimeout(() => {
+      const self = this;
+      (function loop() {
+        if (self.state.isPreview) {
+          self.canvas.renderAll();
+          setTimeout(loop, 1000 / 30); // drawing at 30fps
+        }
+      })();
+    });
   }
 
   stopActiveVideo() {
@@ -206,23 +349,6 @@ export default class TemplateBuilderApp extends React.Component {
     videoElement.load();
   }
 
-  addText() {
-    const text = new fabric.Text('Click me to edit', {
-      left: 0,
-      top: 0,
-      fontFamily: 'helvetica',
-      angle: 0,
-      fill: '#000',
-      scaleX: 0.5,
-      scaleY: 0.5,
-      fontWeight: '',
-      originX: 'left',
-      hasRotatingPoint: true,
-      centerTransform: true,
-    });
-
-    this.canvas.add(text);
-  }
 
   bringToFront() {
     const object = this.canvas.getActiveObject();
@@ -273,13 +399,32 @@ export default class TemplateBuilderApp extends React.Component {
       return (
         <VideoProperties updateTo={this.updateScalingStyle.bind(this)}
                          clickStop={this.stopActiveVideo.bind(this)}
-                         clickPlay={this.playActiveVideo.bind(this)}
                          videoObj={this.activeObject}/>
+      );
+    }
+    if (this.state.activePropType === 'website') {
+      return (
+        <WebProperties updateTo={this.updateWebsite.bind(this)}
+                       webObj={this.activeObject}/>
       );
     }
   }
 
   renderInputDialog() {
+    let placeHolder;
+    let doneCallback;
+    if (this.state.urlType === URL_TYPES.IMAGE) {
+      placeHolder = 'Input image URL';
+      doneCallback = this.addImage.bind(this);
+    }
+    if (this.state.urlType === URL_TYPES.VIDEO) {
+      placeHolder = 'Input video URL';
+      doneCallback = this.addVideo.bind(this);
+    }
+    if (this.state.urlType === URL_TYPES.WEBSITE) {
+      placeHolder = 'Input website URL';
+      doneCallback = this.addWebsite.bind(this);
+    }
     return (
       <Modal show={this.state.showModal} onHide={this.hideInputUrlDialog.bind(this)}>
         <Modal.Header closeButton>
@@ -288,16 +433,18 @@ export default class TemplateBuilderApp extends React.Component {
         <Modal.Body>
           <form className="form-horizontal">
             <div className="form-group">
-              <label className="control-label col-xs-2">Url</label>
+              <label className="control-label col-xs-2">URL</label>
               <div className="col-xs-10">
-                <input className="form-control" ref="inputUrl"/>
+                <input className="form-control"
+                       placeholder={placeHolder}
+                       ref="inputUrl"/>
               </div>
             </div>
           </form>
         </Modal.Body>
         <Modal.Footer>
           <button className="btn btn-primary"
-                  onClick={this.state.urlType === 'image' ? this.addImage.bind(this) : this.addVideo.bind(this)}>Ok
+                  onClick={doneCallback}>Ok
           </button>
         </Modal.Footer>
       </Modal>
@@ -308,19 +455,28 @@ export default class TemplateBuilderApp extends React.Component {
     return (
       <div className="app-container">
         <div className="panel panel-info pull-left main-canvas-wrapper">
-          <div className="panel-heading">Preview</div>
+          <div className="panel-heading">
+            <button className="btn btn-default"
+                    onClick={this.preview.bind(this)}>{this.state.isPreview ? 'Stop Preview' : 'Preview'}</button>
+          </div>
           <div className="panel-body">
             <canvas width="640" height="360" ref="mainCanvas"></canvas>
           </div>
         </div>
-        <div className="controller-container pull-left">
+        <div className={this.state.isPreview ? 'hidden' : 'controller-container pull-left'}>
           <div className="object-container panel panel-info">
             <div className="panel-heading">Insert</div>
             <div className="panel-body">
-              <button className="btn btn-primary" onClick={this.showInputUrlDialog.bind(this, 'video')}>Video</button>
-              <button className="btn btn-primary" onClick={this.showInputUrlDialog.bind(this, 'image')}>Image</button>
+              <button className="btn btn-primary" onClick={this.showInputUrlDialog.bind(this, URL_TYPES.VIDEO)}>
+                Video
+              </button>
+              <button className="btn btn-primary" onClick={this.showInputUrlDialog.bind(this, URL_TYPES.IMAGE)}>
+                Image
+              </button>
+              <button className="btn btn-primary" onClick={this.showInputUrlDialog.bind(this, URL_TYPES.WEBSITE)}>
+                Website
+              </button>
               <button className="btn btn-primary" onClick={this.addText.bind(this)}>Text</button>
-              <button className="btn btn-primary">Web</button>
               <button className="btn btn-default" onClick={this.removeActiveObject.bind(this)}>Remove</button>
               <button className="btn btn-default" onClick={this.clearCanvas.bind(this)}>Clear</button>
               <button className="btn btn-default" onClick={this.toJson.bind(this)}>To JSON</button>
@@ -331,8 +487,12 @@ export default class TemplateBuilderApp extends React.Component {
               <div className="panel-heading">Arrangement</div>
               <div className="panel-body">
                 {this.arrangementButtons.map((button) => {
-                  return (<button onClick={this.clickArrangement.bind(this, button.key)} key={button.key}
-                                  className="btn btn-default" value={button.key}>{button.label}</button>);
+                  const classes = ['btn', 'btn-default'];
+                  if (button.key === this.state.selectedArrangement) {
+                    classes.push('active');
+                  }
+                  return (<button onClick={this.updateArrangement.bind(this, button.key)} key={button.key}
+                                  className={classNames(...classes)} value={button.key}>{button.label}</button>);
                 })}
               </div>
             </div>
@@ -341,12 +501,18 @@ export default class TemplateBuilderApp extends React.Component {
             <div className="object-container panel panel-info">
               <div className="panel-heading">Layer Order</div>
               <div className="panel-body">
-                <button className="btn btn-default send-to-back-btn" onClick={this.bringToFront.bind(this)}>
-                  Bring2Front
+                <button className="btn btn-default" onClick={this.bringToFront.bind(this)}>
+                  Bring to Front
                 </button>
-                <button className="btn btn-default" onClick={this.sendToBack.bind(this)}>Send2Back</button>
-                <button className="btn btn-default" onClick={this.bringForward.bind(this)}>BringForward</button>
-                <button className="btn btn-default" onClick={this.sendBackWards.bind(this)}>SendBackwards</button>
+                <button className="btn btn-default" onClick={this.sendToBack.bind(this)}>
+                  Send To Back
+                </button>
+                <button className="btn btn-default" onClick={this.bringForward.bind(this)}>
+                  Bring Forward
+                </button>
+                <button className="btn btn-default" onClick={this.sendBackWards.bind(this)}>
+                  Send Backwards
+                </button>
               </div>
             </div>
           </div>

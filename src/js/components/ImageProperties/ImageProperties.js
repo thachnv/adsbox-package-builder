@@ -29,7 +29,7 @@ export default class ImageProperties extends React.Component {
     this.setState({
       scalingStyle: value,
     });
-    this.props.updateTo('scalingStyle', value);
+    this.props.updateTo(value);
   }
 
   render() {
@@ -37,11 +37,11 @@ export default class ImageProperties extends React.Component {
       <div className="panel panel-info">
         <div className="panel-heading">Image Properties</div>
         <div className="panel-body">
-          <div className="text-properties">
+          <div className="image-properties">
             <form className="form-horizontal">
               <div className="form-group">
-                <label className="control-label col-xs-2">Scaling Style</label>
-                <div className="col-xs-10">
+                <label className="control-label col-xs-3">Scaling Style</label>
+                <div className="col-xs-9">
                   {this.scalingStyleButtons.map((button) => {
                     const classes = ['btn', 'btn-default'];
                     if (button.key === this.state.scalingStyle) {
