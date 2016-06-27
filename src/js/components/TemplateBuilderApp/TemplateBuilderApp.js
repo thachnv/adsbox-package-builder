@@ -198,7 +198,6 @@ export default class TemplateBuilderApp extends React.Component {
   }
 
   addImage(url) {
-    this.hideInputUrlDialog();
     fabric.Image.fromURL(url, (image) => {
       image.set({
         scalingStyle: 'free',
@@ -291,14 +290,18 @@ export default class TemplateBuilderApp extends React.Component {
 
   preview() {
     if (this.state.isPreview) {
+      this.zoomCanvas(0.5);
       this.setState({
         isPreview: false,
       });
       return;
     }
+
+    this.zoomCanvas(2);
     this.setState({
       isPreview: true,
     });
+
     this.canvas.getObjects().forEach(object => {
       if (object.type === 'video') {
         const videoElement = document.createElement('video');
@@ -415,6 +418,33 @@ export default class TemplateBuilderApp extends React.Component {
   doneInputImage(url) {
     this.addImage(url);
     this.hideInputImageDialog();
+  }
+
+  zoomCanvas(factor) {
+    this.canvas.setHeight(this.canvas.getHeight() * factor);
+    this.canvas.setWidth(this.canvas.getWidth() * factor);
+    var objects = this.canvas.getObjects();
+
+    objects.forEach(object => {
+      const scaleX = object.scaleX;
+      const scaleY = object.scaleY;
+      const left = object.left;
+      const top = object.top;
+
+      const tempScaleX = scaleX * factor;
+      const tempScaleY = scaleY * factor;
+      const tempLeft = left * factor;
+      const tempTop = top * factor;
+
+      object.scaleX = tempScaleX;
+      object.scaleY = tempScaleY;
+      object.left = tempLeft;
+      object.top = tempTop;
+
+      object.setCoords();
+    });
+    this.canvas.renderAll();
+    this.canvas.calcOffset();
   }
 
   renderPropertiesPanel() {
