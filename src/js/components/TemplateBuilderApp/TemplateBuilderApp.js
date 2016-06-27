@@ -5,15 +5,11 @@ import TextProperties from '../TextProperties/TextProperties.js';
 import ImageProperties from '../ImageProperties/ImageProperties.js';
 import VideoProperties from '../VideoProperties/VideoProperties.js';
 import WebProperties from '../WebProperties/WebProperties.js';
-import {Modal} from 'react-bootstrap';
 import {ARRANGEMENT, SCALING_STYLES} from '../../constant.js';
+import InputVideoDialog from '../InputVideoDialog/InputVideoDialog';
+import InputWebsiteDialog from '../InputWebsiteDialog/InputWebsiteDialog';
+import InputImageDialog from '../InputImageDialog/InputImageDialog';
 import classNames from 'classnames';
-
-const URL_TYPES = {
-  IMAGE: 'image',
-  VIDEO: 'video',
-  WEBSITE: 'website',
-};
 
 export default class TemplateBuilderApp extends React.Component {
   constructor() {
@@ -201,8 +197,7 @@ export default class TemplateBuilderApp extends React.Component {
     this.canvas.add(text);
   }
 
-  addImage() {
-    const url = this.refs.inputUrl.value;
+  addImage(url) {
     this.hideInputUrlDialog();
     fabric.Image.fromURL(url, (image) => {
       image.set({
@@ -216,10 +211,7 @@ export default class TemplateBuilderApp extends React.Component {
     });
   }
 
-  addVideo() {
-    const url = this.refs.inputUrl.value;
-    this.hideInputUrlDialog();
-
+  addVideo(url) {
     const videoElement = document.createElement('video');
     const sourceMP4 = document.createElement('source');
     sourceMP4.src = url;
@@ -242,8 +234,6 @@ export default class TemplateBuilderApp extends React.Component {
 
   addWebsite() {
     const url = this.refs.inputUrl.value;
-    this.hideInputUrlDialog();
-
     fabric.util.loadImage(url, (img) => {
       const website = new Website(img);
       website.set({
@@ -256,14 +246,6 @@ export default class TemplateBuilderApp extends React.Component {
       this.toMiddle(website);
       this.canvas.add(website);
     });
-  }
-
-  showInputUrlDialog(type) {
-    this.setState({showModal: true, urlType: type});
-  }
-
-  hideInputUrlDialog() {
-    this.setState({showModal: false});
   }
 
   applyArrangement(object) {
@@ -382,6 +364,59 @@ export default class TemplateBuilderApp extends React.Component {
     console.log(JSON.stringify(this.canvas));
   }
 
+
+  // Input dialogs
+  hideInputVideoDialog() {
+    this.setState({
+      showInputVideoDialog: false,
+    });
+  }
+
+  showInputVideoDialog() {
+    this.setState({
+      showInputVideoDialog: true,
+    });
+  }
+
+  doneInputVideo(url) {
+    this.addVideo(url);
+    this.hideInputVideoDialog();
+  }
+
+  hideInputWebsiteDialog() {
+    this.setState({
+      showInputVideoDialog: false,
+    });
+  }
+
+  showInputWebsiteDialog() {
+    this.setState({
+      showInputVideoDialog: true,
+    });
+  }
+
+  doneInputWebsite(url) {
+    this.addVideo(url);
+    this.hideInputWebsiteDialog();
+  }
+
+  hideInputImageDialog() {
+    this.setState({
+      showInputImageDialog: false,
+    });
+  }
+
+  showInputImageDialog() {
+    this.setState({
+      showInputImageDialog: true,
+    });
+  }
+
+  doneInputImage(url) {
+    this.addImage(url);
+    this.hideInputImageDialog();
+  }
+
   renderPropertiesPanel() {
     if (this.state.activePropType === 'text') {
       return (
@@ -398,7 +433,6 @@ export default class TemplateBuilderApp extends React.Component {
     if (this.state.activePropType === 'video') {
       return (
         <VideoProperties updateTo={this.updateScalingStyle.bind(this)}
-                         clickStop={this.stopActiveVideo.bind(this)}
                          videoObj={this.activeObject}/>
       );
     }
@@ -410,53 +444,12 @@ export default class TemplateBuilderApp extends React.Component {
     }
   }
 
-  renderInputDialog() {
-    let placeHolder;
-    let doneCallback;
-    if (this.state.urlType === URL_TYPES.IMAGE) {
-      placeHolder = 'Input image URL';
-      doneCallback = this.addImage.bind(this);
-    }
-    if (this.state.urlType === URL_TYPES.VIDEO) {
-      placeHolder = 'Input video URL';
-      doneCallback = this.addVideo.bind(this);
-    }
-    if (this.state.urlType === URL_TYPES.WEBSITE) {
-      placeHolder = 'Input website URL';
-      doneCallback = this.addWebsite.bind(this);
-    }
-    return (
-      <Modal show={this.state.showModal} onHide={this.hideInputUrlDialog.bind(this)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Input URL</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <form className="form-horizontal">
-            <div className="form-group">
-              <label className="control-label col-xs-2">URL</label>
-              <div className="col-xs-10">
-                <input className="form-control"
-                       placeholder={placeHolder}
-                       ref="inputUrl"/>
-              </div>
-            </div>
-          </form>
-        </Modal.Body>
-        <Modal.Footer>
-          <button className="btn btn-primary"
-                  onClick={doneCallback}>Ok
-          </button>
-        </Modal.Footer>
-      </Modal>
-    );
-  }
-
   render() {
     return (
       <div className="app-container">
         <div className="panel panel-info pull-left main-canvas-wrapper">
           <div className="panel-heading">
-            <button className="btn btn-default"
+            <button className="btn btn-primary"
                     onClick={this.preview.bind(this)}>{this.state.isPreview ? 'Stop Preview' : 'Preview'}</button>
           </div>
           <div className="panel-body">
@@ -467,13 +460,13 @@ export default class TemplateBuilderApp extends React.Component {
           <div className="object-container panel panel-info">
             <div className="panel-heading">Insert</div>
             <div className="panel-body">
-              <button className="btn btn-primary" onClick={this.showInputUrlDialog.bind(this, URL_TYPES.VIDEO)}>
+              <button className="btn btn-primary" onClick={this.showInputVideoDialog.bind(this)}>
                 Video
               </button>
-              <button className="btn btn-primary" onClick={this.showInputUrlDialog.bind(this, URL_TYPES.IMAGE)}>
+              <button className="btn btn-primary" onClick={this.showInputImageDialog.bind(this)}>
                 Image
               </button>
-              <button className="btn btn-primary" onClick={this.showInputUrlDialog.bind(this, URL_TYPES.WEBSITE)}>
+              <button className="btn btn-primary" onClick={this.showInputWebsiteDialog.bind(this)}>
                 Website
               </button>
               <button className="btn btn-primary" onClick={this.addText.bind(this)}>Text</button>
@@ -520,7 +513,15 @@ export default class TemplateBuilderApp extends React.Component {
             {this.renderPropertiesPanel()}
           </div>
         </div>
-        {this.renderInputDialog()}
+        <InputVideoDialog show={this.state.showInputVideoDialog}
+                          done={this.doneInputVideo.bind(this)}
+                          onHide={this.hideInputVideoDialog.bind(this)}/>
+        <InputWebsiteDialog show={this.state.showInputWebsiteDialog}
+                            done={this.doneInputWebsite.bind(this)}
+                            onHide={this.hideInputWebsiteDialog.bind(this)}/>
+        <InputImageDialog show={this.state.showInputImageDialog}
+                          done={this.doneInputImage.bind(this)}
+                          onHide={this.hideInputImageDialog.bind(this)}/>
       </div>
     );
   }
