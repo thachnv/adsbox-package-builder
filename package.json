@@ -1,6 +1,6 @@
 {
   "name": "template-builder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A template builder using fabric",
   "main": "src/js/app.js",
   "scripts": {
