@@ -1,23 +1,72 @@
 var path = require('path');
+var pkg = require('./package.json');
+var util = require('util');
 var webpack = require('webpack');
+require('dotenv').config({ silent: true });
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
+var isDevMode = process.env.NODE_ENV === 'development';
 
+
+const configKeys = Object.keys(process.env);
+var configs = {};
+
+for (var i = 0; i< configKeys.length; i++) {
+  var key = configKeys[i];
+  configs[key] = process.env[key];
+}
+
+var plugins = [];
+var cssLoader;
+var jsLoaders = ['babel'];
+var htmlLoader = [
+  'file-loader?name=[path][name].[ext]',
+  'template-html-loader?' + [
+    'raw=true',
+    'engine=lodash',
+    'version=' + pkg.version,
+    'title=' + pkg.name,
+  ].join('&')
+].join('!');
+
+if (isDevMode) {
+  jsLoaders.push('react-hot');
+  cssLoader = [
+    'style-loader',
+    'css-loader?sourceMap&localIdentName=[name]__[local]___[hash:base64:5]',
+    'postcss-loader',
+    'less-loader',
+  ].join('!');
+} else {
+  plugins.push(new webpack.optimize.UglifyJsPlugin());
+  plugins.push(new webpack.DefinePlugin({
+    'process.env': {
+      NODE_ENV: JSON.stringify('production')
+    }
+  }));
+
+  var cssBundleName = path.join('css', util.format('[name].%s.css', pkg.version));
+  plugins.push(new ExtractTextPlugin(cssBundleName));
+
+  cssLoader = ExtractTextPlugin.extract('style-loader', [
+    'css-loader?localIdentName=[hash:base64:5]',
+    'postcss-loader',
+    'less-loader',
+  ].join('!'));
+}
 module.exports = {
-  entry: {app: './src/js/app.js'},
+  entry: {app: './js/app.js'},
+  context: path.join(__dirname, './src'),
   output: {
     path: path.resolve('./build'),
-    filename: '[name].js',
+    filename: path.join('js', util.format('[name].%s.js', pkg.version)),
   },
-  plugins: [
-    // new webpack.optimize.UglifyJsPlugin(),
-    new ExtractTextPlugin("app.bundle.css"),
-  ],
+  plugins: plugins,
   module: {
     loaders: [
       {
         test: /\.js$/,
         exclude: /(node_modules|bower_components)/,
-        loaders: ['react-hot', 'babel'],
+        loaders: jsLoaders,
       },
       {
         test: /\.svg$/,
@@ -25,18 +74,15 @@ module.exports = {
       },
       {
         test: /\.less$/,
-        exclude: /node_modules/,
         loaders: ['style-loader', 'css-loader', 'less-loader', 'postcss-loader'],
       },
       {
         test: /\.css$/,
-        exclude: /node_modules/,
-        loaders: ['style-loader', 'css-loader', 'postcss-loader'],
+        loader: cssLoader,
       },
       {
         test: /\.html$/,
-        exclude: /node_modules/,
-        loader: 'file-loader?name=[name].[ext]',
+        loader: htmlLoader,
       },
       {
         test: /\.eot(\?\S*)?/,
@@ -54,7 +100,7 @@ module.exports = {
       {test: /\.svg(\?\S*)?/, loader: 'url-loader?name=assets/[name].[ext]&limit=100000&mimetype=application/font-svg'},
     ]
   },
-  devtool: 'source-map',
+  devtool: isDevMode ? 'source-map' : false,
   devServer: {
     contentBase: path.resolve('./build'),
     headers: {"Access-Control-Allow-Origin": "*"},

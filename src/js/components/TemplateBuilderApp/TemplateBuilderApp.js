@@ -94,6 +94,13 @@ export default class TemplateBuilderApp extends React.Component {
       this.toRight(object);
       this.toMiddle(object);
     }
+    if (arrangement === ARRANGEMENT.CENTER_MIDDLE) {
+      scale = this.canvas.height / object.height;
+      object.set('scaleX', scale);
+      object.set('scaleY', scale);
+      this.toCenter(object);
+      this.toMiddle(object);
+    }
   }
 
   fullObject(object) {
@@ -128,6 +135,14 @@ export default class TemplateBuilderApp extends React.Component {
       object.set('scaleX', scaleX);
       object.set('scaleY', scaleY);
       this.toRight(object);
+      this.toMiddle(object);
+    }
+    if (arrangement === ARRANGEMENT.CENTER_MIDDLE) {
+      const scaleX = this.canvas.width / object.width;
+      const scaleY = this.canvas.height / object.height;
+      object.set('scaleX', scaleX);
+      object.set('scaleY', scaleY);
+      this.toCenter(object);
       this.toMiddle(object);
     }
   }
@@ -192,6 +207,7 @@ export default class TemplateBuilderApp extends React.Component {
       originX: 'center',
       originY: 'center',
     });
+    text.arrangement = ARRANGEMENT.CENTER_MIDDLE;
     this.toCenter(text);
     this.toMiddle(text);
     this.canvas.add(text);
@@ -204,6 +220,7 @@ export default class TemplateBuilderApp extends React.Component {
         originX: 'center',
         originY: 'center',
       });
+      image.arrangement = ARRANGEMENT.CENTER_MIDDLE;
       this.toCenter(image);
       this.toMiddle(image);
       this.canvas.add(image);
@@ -223,8 +240,9 @@ export default class TemplateBuilderApp extends React.Component {
       const video = new Video(videoElement, {
         originX: 'center',
         originY: 'center',
-        url: url,
+        src: url,
       });
+      video.arrangement = ARRANGEMENT.CENTER_MIDDLE;
       this.toCenter(video);
       this.toMiddle(video);
       this.canvas.add(video);
@@ -241,6 +259,7 @@ export default class TemplateBuilderApp extends React.Component {
         originY: 'center',
         url: url,
       });
+      website.arrangement = ARRANGEMENT.CENTER_MIDDLE;
       this.toCenter(website);
       this.toMiddle(website);
       this.canvas.add(website);
@@ -306,7 +325,7 @@ export default class TemplateBuilderApp extends React.Component {
       if (object.type === 'video') {
         const videoElement = document.createElement('video');
         const sourceMP4 = document.createElement('source');
-        sourceMP4.src = object.url;
+        sourceMP4.src = object.src;
         videoElement.appendChild(sourceMP4);
         videoElement.load();
         videoElement.addEventListener('loadeddata', () => {
