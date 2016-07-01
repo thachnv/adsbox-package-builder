@@ -1,15 +1,18 @@
 import React from 'react';
 import Video from '../../objects/Video.js';
 import Website from '../../objects/Website.js';
+import Text from '../../objects/Text';
 import TextProperties from '../TextProperties/TextProperties.js';
 import ImageProperties from '../ImageProperties/ImageProperties.js';
 import VideoProperties from '../VideoProperties/VideoProperties.js';
 import WebProperties from '../WebProperties/WebProperties.js';
-import {ARRANGEMENT, SCALING_STYLES} from '../../constant.js';
+import {ARRANGEMENT, SCALING_STYLES, API} from '../../constant.js';
 import InputVideoDialog from '../InputVideoDialog/InputVideoDialog';
 import InputWebsiteDialog from '../InputWebsiteDialog/InputWebsiteDialog';
 import InputImageDialog from '../InputImageDialog/InputImageDialog';
+import InputTemplateNameDialog from '../InputTemplateNameDialog/InputTemplateNameDialog';
 import classNames from 'classnames';
+import api from '../../utils/api';
 
 export default class TemplateBuilderApp extends React.Component {
   constructor() {
@@ -203,7 +206,7 @@ export default class TemplateBuilderApp extends React.Component {
   }
 
   addText() {
-    const text = new fabric.Text('Click me to edit', {
+    const text = new Text('Click me to edit', {
       originX: 'center',
       originY: 'center',
     });
@@ -309,14 +312,18 @@ export default class TemplateBuilderApp extends React.Component {
 
   preview() {
     if (this.state.isPreview) {
-      this.zoomCanvas(0.5);
+      this.zoomCanvas(this.canvas, 0.5);
+      this.canvas.renderAll();
+      this.canvas.calcOffset();
       this.setState({
         isPreview: false,
       });
       return;
     }
 
-    this.zoomCanvas(2);
+    this.zoomCanvas(this.canvas, 2);
+    this.canvas.renderAll();
+    this.canvas.calcOffset();
     this.setState({
       isPreview: true,
     });
@@ -407,13 +414,13 @@ export default class TemplateBuilderApp extends React.Component {
 
   hideInputWebsiteDialog() {
     this.setState({
-      showInputVideoDialog: false,
+      showInputWebsiteDialog: false,
     });
   }
 
   showInputWebsiteDialog() {
     this.setState({
-      showInputVideoDialog: true,
+      showInputWebsiteDialog: true,
     });
   }
 
@@ -439,11 +446,46 @@ export default class TemplateBuilderApp extends React.Component {
     this.hideInputImageDialog();
   }
 
-  zoomCanvas(factor) {
-    this.canvas.setHeight(this.canvas.getHeight() * factor);
-    this.canvas.setWidth(this.canvas.getWidth() * factor);
-    var objects = this.canvas.getObjects();
+  hideInputTemplateNameDialog() {
+    this.setState({
+      showInputTemplateNameDialog: false,
+    });
+  }
 
+  showInputTemplateNameDialog() {
+    this.setState({
+      showInputTemplateNameDialog: true,
+    });
+  }
+
+  doneInputTemplateName(name) {
+    // this.addImage(url);
+    // console.log(this.canvas.toJSON())
+    const objects = this.canvas.toJSON().objects;
+    this.zoomObjects(objects, 3, false);
+    console.log(objects);
+    const requestData = {
+      template: {
+        name: name,
+        objects: objects,
+      },
+    };
+
+    console.log(requestData);
+
+    api.post(API.TEMPLATE, requestData).done(response => {
+      if (response.information === 'success') {
+        this.hideInputTemplateNameDialog();
+      }
+    }).fail(error => {
+      $.notify('Fail to save template', {
+        className: 'error',
+        elementPosition: 'bottom right',
+      });
+    });
+  }
+
+  zoomObjects(objects, factor, render) {
     objects.forEach(object => {
       const scaleX = object.scaleX;
       const scaleY = object.scaleY;
@@ -460,10 +502,35 @@ export default class TemplateBuilderApp extends React.Component {
       object.left = tempLeft;
       object.top = tempTop;
 
-      object.setCoords();
+      if (render) {
+        object.setCoords();
+      }
     });
-    this.canvas.renderAll();
-    this.canvas.calcOffset();
+  }
+
+  zoomCanvas(canvas, factor) {
+    canvas.setHeight(canvas.getHeight() * factor);
+    canvas.setWidth(canvas.getWidth() * factor);
+    const objects = canvas.getObjects();
+    this.zoomObjects(objects, factor, true);
+    // objects.forEach(object => {
+    //   const scaleX = object.scaleX;
+    //   const scaleY = object.scaleY;
+    //   const left = object.left;
+    //   const top = object.top;
+    //
+    //   const tempScaleX = scaleX * factor;
+    //   const tempScaleY = scaleY * factor;
+    //   const tempLeft = left * factor;
+    //   const tempTop = top * factor;
+    //
+    //   object.scaleX = tempScaleX;
+    //   object.scaleY = tempScaleY;
+    //   object.left = tempLeft;
+    //   object.top = tempTop;
+    //
+    //   object.setCoords();
+    // });
   }
 
   renderPropertiesPanel() {
@@ -521,7 +588,7 @@ export default class TemplateBuilderApp extends React.Component {
               <button className="btn btn-primary" onClick={this.addText.bind(this)}>Text</button>
               <button className="btn btn-default" onClick={this.removeActiveObject.bind(this)}>Remove</button>
               <button className="btn btn-default" onClick={this.clearCanvas.bind(this)}>Clear</button>
-              <button className="btn btn-default" onClick={this.toJson.bind(this)}>To JSON</button>
+              <button className="btn btn-default" onClick={this.showInputTemplateNameDialog.bind(this)}>To JSON</button>
             </div>
           </div>
           <div className="arrangement-container">
@@ -571,6 +638,10 @@ export default class TemplateBuilderApp extends React.Component {
         <InputImageDialog show={this.state.showInputImageDialog}
                           done={this.doneInputImage.bind(this)}
                           onHide={this.hideInputImageDialog.bind(this)}/>
+        <InputTemplateNameDialog show={this.state.showInputTemplateNameDialog}
+                                 done={this.doneInputTemplateName.bind(this)}
+                                 onHide={this.hideInputTemplateNameDialog.bind(this)}/>
+        <div className="clearfix"></div>
       </div>
     );
   }

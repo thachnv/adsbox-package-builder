@@ -17,7 +17,7 @@ for (var i = 0; i< configKeys.length; i++) {
 
 var plugins = [];
 var cssLoader;
-var jsLoaders = ['babel'];
+var jsLoaders = [];
 var htmlLoader = [
   'file-loader?name=[path][name].[ext]',
   'template-html-loader?' + [
@@ -53,6 +53,7 @@ if (isDevMode) {
     'less-loader',
   ].join('!'));
 }
+jsLoaders.push('babel');
 module.exports = {
   entry: {app: './js/app.js'},
   context: path.join(__dirname, './src'),

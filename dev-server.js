@@ -9,7 +9,6 @@ var server = new WebpackDevServer(
   webpack(config),
   config.devServer
 );
-console.log(config);
 server.listen(8080, '0.0.0.0', function (err) {
   console.log('Ok');
 });

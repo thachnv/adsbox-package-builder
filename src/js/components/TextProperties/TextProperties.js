@@ -9,6 +9,7 @@ export default class TextProperties extends React.Component {
       fontSize: 10,
       italic: false,
       bold: false,
+      animation: ''
     };
     this.fonts = [
       'Times New Roman',
@@ -20,6 +21,20 @@ export default class TextProperties extends React.Component {
       'Trebuchet MS',
       'Verdana',
       'Courier New',
+    ];
+    this.animations = [
+      {
+        label: 'None',
+        animation: '',
+      },
+      {
+        label: 'Left To Right',
+        value: 'leftToRight',
+      },
+      {
+        label: 'Right To Left',
+        value: 'rightToLeft',
+      },
     ];
   }
 
@@ -95,10 +110,11 @@ export default class TextProperties extends React.Component {
               <div className="form-group">
                 <label className="control-label col-xs-2">Font</label>
                 <div className="col-xs-10">
-                  <select className="form-control" value={this.state.fontFamily} onChange={this.handleTextChange.bind(this, 'fontFamily')}>
-                    {this.fonts.map(font => {
+                  <select className="form-control" value={this.state.fontFamily}
+                          onChange={this.handleTextChange.bind(this, 'fontFamily')}>
+                    {this.fonts.map((font, index) => {
                       return (
-                        <option value={font}>{font}</option>
+                        <option value={font} key={index}>{font}</option>
                       );
                     })}
                   </select>
@@ -137,6 +153,19 @@ export default class TextProperties extends React.Component {
                              checked={this.state.italic}/> Italic
                     </label>
                   </div>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="control-label col-xs-2">Animation</label>
+                <div className="col-xs-10">
+                  <select className="form-control" value={this.state.animation}
+                          onChange={this.handleTextChange.bind(this, 'animation')}>
+                    {this.animations.map(animation => {
+                      return (
+                        <option value={animation.value} key={animation.value}>{animation.label}</option>
+                      );
+                    })}
+                  </select>
                 </div>
               </div>
             </form>

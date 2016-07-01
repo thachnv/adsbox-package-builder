@@ -30,8 +30,8 @@ export default class InputVideoDialog extends React.Component {
       const data = new FormData();
       data.append(this.state.selectedFile);
       api.uploadPost(API.UPLOAD, data).done(response => {
-        console.log(response);
-        this.props.done(response);
+        const video = response.result.media;
+        this.props.done(video.url);
       }).fail((error) => {
         console.log(error);
       });

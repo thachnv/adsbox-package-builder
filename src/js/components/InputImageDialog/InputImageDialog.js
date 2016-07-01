@@ -39,8 +39,8 @@ export default class UploadDialog extends React.Component {
       const data = new FormData();
       data.append(this.state.selectedFile);
       api.uploadPost(API.UPLOAD, data).done(response => {
-        console.log(response);
-        this.props.done(response);
+        const image = response.result.media;
+        this.props.done(image.url);
       }).fail((error) => {
         console.log(error);
       });
