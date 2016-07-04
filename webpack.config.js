@@ -60,6 +60,7 @@ module.exports = {
   output: {
     path: path.resolve('./build'),
     filename: path.join('js', util.format('[name].%s.js', pkg.version)),
+    publicPath: '/'
   },
   plugins: plugins,
   module: {
@@ -70,8 +71,8 @@ module.exports = {
         loaders: jsLoaders,
       },
       {
-        test: /\.svg$/,
-        loader: 'file-loader?name=assets/[name].[ext]',
+        test: /\.png/,
+        loader: isDevMode ? 'url-loader?name=assets/[name].[ext]&limit=100000' : 'file-loader?name=[path][name].[ext]',
       },
       {
         test: /\.less$/,

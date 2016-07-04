@@ -26,17 +26,176 @@ export default class TemplateBuilderApp extends React.Component {
     };
     this.activeObject = null;
     this.arrangementButtons = [
-      {label: 'Center', key: ARRANGEMENT.CENTER_MIDDLE},
-      {label: 'Left', key: ARRANGEMENT.MIDDLE_LEFT},
-      {label: 'Right', key: ARRANGEMENT.MIDDLE_RIGHT},
-      {label: 'Top', key: ARRANGEMENT.CENTER_TOP},
-      {label: 'Bottom', key: ARRANGEMENT.CENTER_BOTTOM},
+      {label: 'Center', key: ARRANGEMENT.CENTER_MIDDLE, className: 'arrangement-center-button'},
+      {label: 'Left', key: ARRANGEMENT.MIDDLE_LEFT, className: 'arrangement-left-button'},
+      {label: 'Right', key: ARRANGEMENT.MIDDLE_RIGHT, className: 'arrangement-right-button'},
+      {label: 'Top', key: ARRANGEMENT.CENTER_TOP, className: 'arrangement-top-button'},
+      {label: 'Bottom', key: ARRANGEMENT.CENTER_BOTTOM, className: 'arrangement-bottom-button'},
     ];
   }
 
   componentDidMount() {
     this.canvas = new fabric.Canvas(this.refs.mainCanvas);
     this.canvas.on('object:selected', this.getActiveObject.bind(this));
+    // const o = [{
+    //   "type": "video",
+    //   "originX": "center",
+    //   "originY": "center",
+    //   "left": 960,
+    //   "top": 540,
+    //   "width": 480,
+    //   "height": 360,
+    //   "fill": "rgb(0,0,0)",
+    //   "stroke": null,
+    //   "strokeWidth": 0,
+    //   "strokeDashArray": null,
+    //   "strokeLineCap": "butt",
+    //   "strokeLineJoin": "miter",
+    //   "strokeMiterLimit": 10,
+    //   "scaleX": 3,
+    //   "scaleY": 3,
+    //   "angle": 30,
+    //   "flipX": false,
+    //   "flipY": false,
+    //   "opacity": 1,
+    //   "shadow": null,
+    //   "visible": true,
+    //   "clipTo": null,
+    //   "backgroundColor": "",
+    //   "fillRule": "nonzero",
+    //   "globalCompositeOperation": "source-over",
+    //   "transformMatrix": null,
+    //   "skewX": 0,
+    //   "skewY": 0,
+    //   "src": "http://html5demos.com/assets/dizzy.mp4",
+    //   "filters": [],
+    //   "resizeFilters": [],
+    //   "crossOrigin": "",
+    //   "alignX": "none",
+    //   "alignY": "none",
+    //   "meetOrSlice": "meet"
+    // }, {
+    //   "type": "website",
+    //   "originX": "center",
+    //   "originY": "center",
+    //   "left": 1332,
+    //   "top": 616.5,
+    //   "width": 440,
+    //   "height": 330,
+    //   "fill": "rgb(0,0,0)",
+    //   "stroke": null,
+    //   "strokeWidth": 0,
+    //   "strokeDashArray": null,
+    //   "strokeLineCap": "butt",
+    //   "strokeLineJoin": "miter",
+    //   "strokeMiterLimit": 10,
+    //   "scaleX": 2.55,
+    //   "scaleY": 2.55,
+    //   "angle": 0,
+    //   "flipX": false,
+    //   "flipY": false,
+    //   "opacity": 1,
+    //   "shadow": null,
+    //   "visible": true,
+    //   "clipTo": null,
+    //   "backgroundColor": "",
+    //   "fillRule": "nonzero",
+    //   "globalCompositeOperation": "source-over",
+    //   "transformMatrix": null,
+    //   "skewX": 0,
+    //   "skewY": 0,
+    //   "src": "https://support.files.wordpress.com/2009/07/pigeony.jpg?w=688",
+    //   "url": "https://support.files.wordpress.com/2009/07/pigeony.jpg?w=688",
+    //   "filters": [],
+    //   "resizeFilters": [],
+    //   "crossOrigin": "",
+    //   "alignX": "none",
+    //   "alignY": "none",
+    //   "meetOrSlice": "meet"
+    // }, {
+    //   "type": "text",
+    //   "originX": "center",
+    //   "originY": "center",
+    //   "left": 500,
+    //   "top": 540,
+    //   "width": 123.02,
+    //   "height": 53.74,
+    //   "fill": "#ba0000",
+    //   "stroke": null,
+    //   "strokeWidth": 1,
+    //   "strokeDashArray": null,
+    //   "strokeLineCap": "butt",
+    //   "strokeLineJoin": "miter",
+    //   "strokeMiterLimit": 10,
+    //   "scaleX": 3,
+    //   "scaleY": 3,
+    //   "angle": 10,
+    //   "flipX": false,
+    //   "flipY": false,
+    //   "opacity": 1,
+    //   "shadow": null,
+    //   "visible": true,
+    //   "clipTo": null,
+    //   "backgroundColor": "",
+    //   "fillRule": "nonzero",
+    //   "globalCompositeOperation": "source-over",
+    //   "transformMatrix": null,
+    //   "skewX": 0,
+    //   "skewY": 0,
+    //   "text": "Hello",
+    //   "fontSize": 41,
+    //   "fontWeight": "bold",
+    //   "fontFamily": "Courier New",
+    //   "fontStyle": "italic",
+    //   "lineHeight": 1.16,
+    //   "textDecoration": "",
+    //   "textAlign": "left",
+    //   "textBackgroundColor": "",
+    //   "animation": "leftToRight"
+    // }];
+    // this.zoomObjects(o, 1 / 3);
+    // this.redraw(o);
+    // // console.log(o);
+    // this.canvas.loadFromJSON(JSON.stringify(o));
+  }
+
+  redraw(objects) {
+    setTimeout(() => {
+      objects.forEach((object, index) => {
+        const options = {
+          originX: object.originX,
+          originY: object.originY,
+          left: object.left,
+          top: object.top,
+          width: object.width,
+          height: object.height,
+          scaleX: object.scaleX,
+          scaleY: object.scaleY,
+          angle: object.angle,
+        };
+        if (object.type === 'video') {
+          options.src = object.src;
+          this.addVideo(object.src, options, index);
+        }
+        if (object.type === 'image') {
+          options.src = object.src;
+          this.addImage(object.src, options, index);
+        }
+        if (object.type === 'website') {
+          options.src = object.src;
+          this.addWebsite(object.url, options, index);
+        }
+        if (object.type === 'text') {
+          options.fontSize = object.fontSize;
+          options.fontWeight = object.fontWeight;
+          options.fontFamily = object.fontFamily;
+          options.fontStyle = object.fontStyle;
+          options.fill = object.fill;
+          options.animation = object.animation;
+          this.addText(object.text, options, index);
+        }
+      });
+    });
   }
 
   getActiveObject() {
@@ -205,32 +364,56 @@ export default class TemplateBuilderApp extends React.Component {
     object.set('top', this.canvas.height - object.getHeight() / 2);
   }
 
-  addText() {
-    const text = new Text('Click me to edit', {
+  addText(text, options, index) {
+    let _text = 'Click me to edit';
+    if (text) {
+      _text = text;
+    }
+    const defaultOptions = {
       originX: 'center',
       originY: 'center',
-    });
-    text.arrangement = ARRANGEMENT.CENTER_MIDDLE;
-    this.toCenter(text);
-    this.toMiddle(text);
-    this.canvas.add(text);
+    };
+    const textObject = new Text(_text, options || defaultOptions);
+    if (!options) {
+      textObject.arrangement = ARRANGEMENT.CENTER_MIDDLE;
+      this.toCenter(textObject);
+      this.toMiddle(textObject);
+    }
+    textObject.setCoords();
+    this.canvas.add(textObject);
+    if (index !== undefined) {
+      this.canvas.moveTo(textObject, index);
+    }
   }
 
-  addImage(url) {
+  clickAddText() {
+    this.addText('Click me to edit');
+  }
+
+  addImage(url, options, index) {
     fabric.Image.fromURL(url, (image) => {
-      image.set({
+      const defaultOptions = {
         scalingStyle: 'free',
         originX: 'center',
         originY: 'center',
-      });
-      image.arrangement = ARRANGEMENT.CENTER_MIDDLE;
-      this.toCenter(image);
-      this.toMiddle(image);
+      };
+      image.set(options || defaultOptions);
+
+      if (!options) {
+        image.arrangement = ARRANGEMENT.CENTER_MIDDLE;
+        this.toCenter(image);
+        this.toMiddle(image);
+      }
+
+      image.setCoords();
       this.canvas.add(image);
+      if (index !== undefined) {
+        this.canvas.moveTo(image, index);
+      }
     });
   }
 
-  addVideo(url) {
+  addVideo(url, options, index) {
     const videoElement = document.createElement('video');
     const sourceMP4 = document.createElement('source');
     sourceMP4.src = url;
@@ -240,32 +423,44 @@ export default class TemplateBuilderApp extends React.Component {
     videoElement.addEventListener('loadeddata', () => {
       videoElement.width = videoElement.videoWidth;
       videoElement.height = videoElement.videoHeight;
-      const video = new Video(videoElement, {
+      const defaultOptions = {
         originX: 'center',
         originY: 'center',
         src: url,
-      });
-      video.arrangement = ARRANGEMENT.CENTER_MIDDLE;
-      this.toCenter(video);
-      this.toMiddle(video);
+      };
+      const video = new Video(videoElement, options || defaultOptions);
+      if (!options) {
+        video.arrangement = ARRANGEMENT.CENTER_MIDDLE;
+        this.toCenter(video);
+        this.toMiddle(video);
+      }
+      video.setCoords();
       this.canvas.add(video);
+      if (index !== undefined) {
+        this.canvas.moveTo(video, index);
+      }
     });
   }
 
-  addWebsite() {
-    const url = this.refs.inputUrl.value;
+  addWebsite(url, options, index) {
     fabric.util.loadImage(url, (img) => {
       const website = new Website(img);
-      website.set({
+      const defaultOptions = {
         scalingStyle: 'free',
         originX: 'center',
         originY: 'center',
         url: url,
-      });
-      website.arrangement = ARRANGEMENT.CENTER_MIDDLE;
-      this.toCenter(website);
-      this.toMiddle(website);
+      };
+      website.set(options || defaultOptions);
+      if (!options) {
+        website.arrangement = ARRANGEMENT.CENTER_MIDDLE;
+        this.toCenter(website);
+        this.toMiddle(website);
+      }
       this.canvas.add(website);
+      if (index !== undefined) {
+        this.canvas.moveTo(website, index);
+      }
     });
   }
 
@@ -318,10 +513,24 @@ export default class TemplateBuilderApp extends React.Component {
       this.setState({
         isPreview: false,
       });
+      this.canvas.getObjects().forEach(object => {
+        object.selectable = true;
+        if (object.type === 'video') {
+          const videoElement = object.getElement();
+          // console.log(videoElement);
+          // videoElement.load();
+          videoElement.pause();
+        }
+      });
       return;
     }
 
     this.zoomCanvas(this.canvas, 2);
+    this.canvas.deactivateAll();
+    this.canvas.forEachObject(object => {
+      object.selectable = false;
+    });
+    // this.canvas.selection = false;
     this.canvas.renderAll();
     this.canvas.calcOffset();
     this.setState({
@@ -425,7 +634,7 @@ export default class TemplateBuilderApp extends React.Component {
   }
 
   doneInputWebsite(url) {
-    this.addVideo(url);
+    this.addWebsite(url);
     this.hideInputWebsiteDialog();
   }
 
@@ -459,26 +668,22 @@ export default class TemplateBuilderApp extends React.Component {
   }
 
   doneInputTemplateName(name) {
-    // this.addImage(url);
-    // console.log(this.canvas.toJSON())
     const objects = this.canvas.toJSON().objects;
     this.zoomObjects(objects, 3, false);
-    console.log(objects);
     const requestData = {
       template: {
         name: name,
         objects: objects,
       },
     };
-
-    console.log(requestData);
+    console.log(JSON.stringify(objects));
 
     api.post(API.TEMPLATE, requestData).done(response => {
       if (response.information === 'success') {
         this.hideInputTemplateNameDialog();
       }
     }).fail(error => {
-      $.notify('Fail to save template', {
+      $.notify(error.message || 'Fail to save template', {
         className: 'error',
         elementPosition: 'bottom right',
       });
@@ -513,24 +718,6 @@ export default class TemplateBuilderApp extends React.Component {
     canvas.setWidth(canvas.getWidth() * factor);
     const objects = canvas.getObjects();
     this.zoomObjects(objects, factor, true);
-    // objects.forEach(object => {
-    //   const scaleX = object.scaleX;
-    //   const scaleY = object.scaleY;
-    //   const left = object.left;
-    //   const top = object.top;
-    //
-    //   const tempScaleX = scaleX * factor;
-    //   const tempScaleY = scaleY * factor;
-    //   const tempLeft = left * factor;
-    //   const tempTop = top * factor;
-    //
-    //   object.scaleX = tempScaleX;
-    //   object.scaleY = tempScaleY;
-    //   object.left = tempLeft;
-    //   object.top = tempTop;
-    //
-    //   object.setCoords();
-    // });
   }
 
   renderPropertiesPanel() {
@@ -576,19 +763,18 @@ export default class TemplateBuilderApp extends React.Component {
           <div className="object-container panel panel-info">
             <div className="panel-heading">Insert</div>
             <div className="panel-body">
-              <button className="btn btn-primary" onClick={this.showInputVideoDialog.bind(this)}>
-                Video
-              </button>
-              <button className="btn btn-primary" onClick={this.showInputImageDialog.bind(this)}>
-                Image
-              </button>
-              <button className="btn btn-primary" onClick={this.showInputWebsiteDialog.bind(this)}>
-                Website
-              </button>
-              <button className="btn btn-primary" onClick={this.addText.bind(this)}>Text</button>
+              <button className="btn btn-primary" onClick={this.showInputVideoDialog.bind(this)}>Video</button>
+              <button className="btn btn-primary" onClick={this.showInputImageDialog.bind(this)}>Image</button>
+              <button className="btn btn-primary" onClick={this.showInputWebsiteDialog.bind(this)}>Website</button>
+              <button className="btn btn-primary" onClick={this.clickAddText.bind(this)}>Text</button>
+            </div>
+          </div>
+          <div className="object-container panel panel-info">
+            <div className="panel-heading">Control</div>
+            <div className="panel-body">
               <button className="btn btn-default" onClick={this.removeActiveObject.bind(this)}>Remove</button>
               <button className="btn btn-default" onClick={this.clearCanvas.bind(this)}>Clear</button>
-              <button className="btn btn-default" onClick={this.showInputTemplateNameDialog.bind(this)}>To JSON</button>
+              <button className="btn btn-primary" onClick={this.showInputTemplateNameDialog.bind(this)}>Save</button>
             </div>
           </div>
           <div className="arrangement-container">
@@ -596,12 +782,14 @@ export default class TemplateBuilderApp extends React.Component {
               <div className="panel-heading">Arrangement</div>
               <div className="panel-body">
                 {this.arrangementButtons.map((button) => {
-                  const classes = ['btn', 'btn-default'];
+                  const classes = ['btn', 'btn-default', 'icon-button', button.className];
                   if (button.key === this.state.selectedArrangement) {
                     classes.push('active');
                   }
-                  return (<button onClick={this.updateArrangement.bind(this, button.key)} key={button.key}
-                                  className={classNames(...classes)} value={button.key}>{button.label}</button>);
+                  return (
+                    <button onClick={this.updateArrangement.bind(this, button.key)} key={button.key}
+                            className={classNames(...classes)} value={button.key}></button>
+                  );
                 })}
               </div>
             </div>
@@ -610,17 +798,17 @@ export default class TemplateBuilderApp extends React.Component {
             <div className="object-container panel panel-info">
               <div className="panel-heading">Layer Order</div>
               <div className="panel-body">
-                <button className="btn btn-default" onClick={this.bringToFront.bind(this)}>
-                  Bring to Front
+                <button className="btn btn-default icon-button bring-to-front-button"
+                        onClick={this.bringToFront.bind(this)}>
                 </button>
-                <button className="btn btn-default" onClick={this.sendToBack.bind(this)}>
-                  Send To Back
+                <button className="btn btn-default icon-button send-to-back-button"
+                        onClick={this.sendToBack.bind(this)}>
                 </button>
-                <button className="btn btn-default" onClick={this.bringForward.bind(this)}>
-                  Bring Forward
+                <button className="btn btn-default icon-button bring-forward-button"
+                        onClick={this.bringForward.bind(this)}>
                 </button>
-                <button className="btn btn-default" onClick={this.sendBackWards.bind(this)}>
-                  Send Backwards
+                <button className="btn btn-default icon-button send-backwards-button"
+                        onClick={this.sendBackWards.bind(this)}>
                 </button>
               </div>
             </div>
