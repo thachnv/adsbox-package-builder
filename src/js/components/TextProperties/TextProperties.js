@@ -25,7 +25,7 @@ export default class TextProperties extends React.Component {
     this.animations = [
       {
         label: 'None',
-        animation: '',
+        value: '',
       },
       {
         label: 'Left To Right',
@@ -34,6 +34,28 @@ export default class TextProperties extends React.Component {
       {
         label: 'Right To Left',
         value: 'rightToLeft',
+      },
+    ];
+    this.fontSizes = [
+      {
+        label: '24',
+        value: 24,
+      },
+      {
+        label: '32',
+        value: 32,
+      },
+      {
+        label: '40',
+        value: 40,
+      },
+      {
+        label: '48',
+        value: 48,
+      },
+      {
+        label: '56',
+        value: 56,
       },
     ];
   }
@@ -101,15 +123,15 @@ export default class TextProperties extends React.Component {
           <div className="text-properties">
             <form className="form-horizontal">
               <div className="form-group">
-                <label className="control-label col-xs-2">Text</label>
-                <div className="col-xs-10">
+                <label className="control-label col-xs-3">Text</label>
+                <div className="col-xs-9">
                   <input className="form-control" value={this.state.text}
                          onChange={this.handleTextChange.bind(this, 'text')}/>
                 </div>
               </div>
               <div className="form-group">
-                <label className="control-label col-xs-2">Font</label>
-                <div className="col-xs-10">
+                <label className="control-label col-xs-3">Font</label>
+                <div className="col-xs-9">
                   <select className="form-control" value={this.state.fontFamily}
                           onChange={this.handleTextChange.bind(this, 'fontFamily')}>
                     {this.fonts.map((font, index) => {
@@ -121,22 +143,27 @@ export default class TextProperties extends React.Component {
                 </div>
               </div>
               <div className="form-group">
-                <label className="control-label col-xs-2">Color</label>
-                <div className="col-xs-10">
+                <label className="control-label col-xs-3">Color</label>
+                <div className="col-xs-9">
                   <input type="color" value={this.state.fill}
                          onChange={this.handleTextChange.bind(this, 'fill')}/>
                 </div>
               </div>
               <div className="form-group">
-                <label className="control-label col-xs-2">Size</label>
-                <div className="col-xs-10">
-                  <input type="number" value={this.state.fontSize}
-                         onChange={this.handleTextChange.bind(this, 'fontSize')}
-                         className="form-control"/>
+                <label className="control-label col-xs-3">Size</label>
+                <div className="col-xs-9">
+                  <select className="form-control" value={this.state.fontSize}
+                          onChange={this.handleTextChange.bind(this, 'fontSize')}>
+                    {this.fontSizes.map((fontSize, index) => {
+                      return (
+                        <option value={fontSize.value} key={index}>{fontSize.label}</option>
+                      );
+                    })}
+                  </select>
                 </div>
               </div>
               <div className="form-group">
-                <div className="col-xs-offset-2 col-xs-10">
+                <div className="col-xs-offset-3 col-xs-9">
                   <div className="checkbox">
                     <label>
                       <input type="checkbox" onChange={this.handleCheckBoxChange.bind(this, 'bold')}
@@ -146,7 +173,7 @@ export default class TextProperties extends React.Component {
                 </div>
               </div>
               <div className="form-group">
-                <div className="col-xs-offset-2 col-xs-10">
+                <div className="col-xs-offset-3 col-xs-9">
                   <div className="checkbox">
                     <label>
                       <input type="checkbox" onChange={this.handleCheckBoxChange.bind(this, 'italic')}
@@ -156,8 +183,8 @@ export default class TextProperties extends React.Component {
                 </div>
               </div>
               <div className="form-group">
-                <label className="control-label col-xs-2">Animation</label>
-                <div className="col-xs-10">
+                <label className="control-label col-xs-3">Animation</label>
+                <div className="col-xs-9">
                   <select className="form-control" value={this.state.animation}
                           onChange={this.handleTextChange.bind(this, 'animation')}>
                     {this.animations.map(animation => {

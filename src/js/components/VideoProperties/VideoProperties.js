@@ -6,7 +6,7 @@ export default class VideoProperties extends React.Component {
   constructor() {
     super();
     this.state = {
-      scalingStyle: SCALING_STYLES.FREE,
+      scalingStyle: SCALING_STYLES.RESET,
     };
     this.scalingStyleButtons = SCALING_STYLE_BUTTONS;
   }
@@ -21,7 +21,7 @@ export default class VideoProperties extends React.Component {
 
   getVideoProps(videoObj) {
     return {
-      scalingStyle: videoObj.scalingStyle || 'free',
+      scalingStyle: videoObj.scalingStyle || SCALING_STYLES.RESET,
     };
   }
 

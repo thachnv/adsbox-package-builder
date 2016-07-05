@@ -5,7 +5,7 @@ export default class ImageProperties extends React.Component {
   constructor() {
     super();
     this.state = {
-      scalingStyle: SCALING_STYLES.FREE,
+      scalingStyle: SCALING_STYLES.RESET,
     };
     this.scalingStyleButtons = SCALING_STYLE_BUTTONS;
   }

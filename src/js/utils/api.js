@@ -1,6 +1,6 @@
 // import config from '../business/config.js';
 import cache from './request-cache';
-var API_END_POINT = 'http://polls.apiblueprint.org/api/v1/';
+var API_END_POINT = 'http://go.adsbox.io/api/v2/';
 const $ = window.jQuery;
 
 const api = {
@@ -36,6 +36,7 @@ const api = {
       });
       this.log('Request sent: ', cacheKey, options);
       return $.ajax(options).then((response) => {
+        console.log(response, '112');
         cache.set(cacheKey, response);
         this.log('Request cached: ' + cacheKey);
         return response;
@@ -46,7 +47,7 @@ const api = {
       this.log('Request sent without cache: ' + cacheKey);
       return ajax();
     }
-    // Use cache
+    // Use cache  
     // Try to get data from cache
     const response = cache.get(cacheKey);
     if (response) {

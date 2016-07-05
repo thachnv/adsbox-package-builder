@@ -35,7 +35,7 @@ export default class TemplateBuilderApp extends React.Component {
   }
 
   componentDidMount() {
-    this.canvas = new fabric.Canvas(this.refs.mainCanvas);
+    this.canvas = new fabric.Canvas(this.refs.mainCanvas, {preserveObjectStacking: true,});
     this.canvas.on('object:selected', this.getActiveObject.bind(this));
     // const o = [{
     //   "type": "video",
@@ -183,7 +183,7 @@ export default class TemplateBuilderApp extends React.Component {
         }
         if (object.type === 'website') {
           options.src = object.src;
-          this.addWebsite(object.url, options, index);
+          this.addWebsite(object.url, object.src, options, index);
         }
         if (object.type === 'text') {
           options.fontSize = object.fontSize;
@@ -265,6 +265,94 @@ export default class TemplateBuilderApp extends React.Component {
     }
   }
 
+  // getFillScale(containerWidth, containerHeight, objectWidth, objectHeight) {
+  //   let scale = this.canvas.width / object.width;
+  //   const containerWidth = this.canvas.width;
+  //   const containerHeight = this.canvas.height / 2;
+  //   if (containerWidth / object.width > containerHeight / object.height) {
+  //     scale = this.canvas.width / object.width;
+  //   } else {
+  //     scale = this.canvas.height / object.height;
+  //   }
+  // }
+
+  fillObject(object) {
+    const arrangement = object.arrangement;
+    if (arrangement === ARRANGEMENT.CENTER_TOP || arrangement === ARRANGEMENT.CENTER_BOTTOM) {
+      let scale = this.canvas.width / object.width;
+      const containerWidth = this.canvas.width;
+      const containerHeight = this.canvas.height / 2;
+      if (containerWidth / object.width > containerHeight / object.height) {
+        scale = this.canvas.width / object.width;
+      } else {
+        scale = this.canvas.height / object.height;
+      }
+
+      // const scaleY = (this.canvas.height / 2 ) / object.height; // should be original height, don't use getHeight()
+      // const scaleY = this.canvas.width / object.height; // should be original height, don't use getHeight()
+      object.set('scaleX', scale);
+      object.set('scaleY', scale);
+      this.toTop(object);
+      this.toCenter(object);
+    }
+    if (arrangement === ARRANGEMENT.CENTER_BOTTOM) {
+      // const scaleX = this.canvas.width / object.width;
+      // const scaleY = (this.canvas.height / 2 ) / object.height; // should be original height, don't use getHeight()
+      let scale = this.canvas.width / object.width;
+      const containerWidth = this.canvas.width;
+      const containerHeight = this.canvas.height / 2;
+      if (containerWidth / object.width > containerHeight / object.height) {
+        scale = this.canvas.width / object.width;
+      } else {
+        scale = this.canvas.height / object.height;
+      }
+
+      object.set('scaleX', scale);
+      object.set('scaleY', scale);
+      this.toBottom(object);
+      this.toCenter(object);
+    }
+    if (arrangement === ARRANGEMENT.MIDDLE_LEFT) {
+      let scale = this.canvas.width / object.width;
+      const containerWidth = this.canvas.width / 2;
+      const containerHeight = this.canvas.height;
+      if (containerWidth / object.width > containerHeight / object.height) {
+        scale = this.canvas.width / object.width;
+      } else {
+        scale = this.canvas.height / object.height;
+      }
+
+      // const scaleX = (this.canvas.width / 2 ) / object.width;
+      // const scaleY = this.canvas.height / object.height;
+      object.set('scaleX', scale);
+      object.set('scaleY', scale);
+      this.toLeft(object);
+      this.toMiddle(object);
+    }
+    if (arrangement === ARRANGEMENT.MIDDLE_RIGHT) {
+      let scale = this.canvas.width / object.width;
+      const containerWidth = this.canvas.width / 2;
+      const containerHeight = this.canvas.height;
+      if (containerWidth / object.width > containerHeight / object.height) {
+        scale = this.canvas.width / object.width;
+      } else {
+        scale = this.canvas.height / object.height;
+      }
+      object.set('scaleX', scale);
+      object.set('scaleY', scale);
+      this.toRight(object);
+      this.toMiddle(object);
+    }
+    if (arrangement === ARRANGEMENT.CENTER_MIDDLE) {
+      const scaleX = this.canvas.width / object.width;
+      const scaleY = this.canvas.height / object.height;
+      object.set('scaleX', scaleX);
+      object.set('scaleY', scaleY);
+      this.toCenter(object);
+      this.toMiddle(object);
+    }
+  }
+
   fullObject(object) {
     const arrangement = object.arrangement;
     if (arrangement === ARRANGEMENT.CENTER_TOP) {
@@ -311,13 +399,13 @@ export default class TemplateBuilderApp extends React.Component {
 
   applyScalingStyle(object) {
     switch (object.scalingStyle) {
-      case SCALING_STYLES.FULL:
-        this.fullObject(object);
+      case SCALING_STYLES.FILL:
+        this.fillObject(object);
         break;
       case SCALING_STYLES.FIT:
         this.fitObject(object);
         break;
-      case SCALING_STYLES.FREE:
+      case SCALING_STYLES.RESET:
         object.scaleX = 1;
         object.scaleY = 1;
         break;
@@ -349,19 +437,19 @@ export default class TemplateBuilderApp extends React.Component {
   }
 
   toLeft(object) {
-    object.set('left', object.getWidth() / 2);
+    object.set('left', this.canvas.width / 2 - object.getWidth() / 2);
   }
 
   toRight(object) {
-    object.set('left', this.canvas.width - object.getWidth() / 2);
+    object.set('left', this.canvas.width / 2 + object.getWidth() / 2);
   }
 
   toTop(object) {
-    object.set('top', object.getHeight() / 2);
+    object.set('top', this.canvas.getHeight() / 2 - object.getHeight() / 2);
   }
 
   toBottom(object) {
-    object.set('top', this.canvas.height - object.getHeight() / 2);
+    object.set('top', this.canvas.getHeight() / 2 + object.getHeight() / 2);
   }
 
   addText(text, options, index) {
@@ -379,6 +467,8 @@ export default class TemplateBuilderApp extends React.Component {
       this.toCenter(textObject);
       this.toMiddle(textObject);
     }
+    textObject.lockScalingX = true;
+    textObject.lockScalingY = true;
     textObject.setCoords();
     this.canvas.add(textObject);
     if (index !== undefined) {
@@ -393,7 +483,7 @@ export default class TemplateBuilderApp extends React.Component {
   addImage(url, options, index) {
     fabric.Image.fromURL(url, (image) => {
       const defaultOptions = {
-        scalingStyle: 'free',
+        scalingStyle: SCALING_STYLES.RESET,
         originX: 'center',
         originY: 'center',
       };
@@ -405,7 +495,7 @@ export default class TemplateBuilderApp extends React.Component {
         this.toMiddle(image);
       }
 
-      image.setCoords();
+      // image.setCoords();
       this.canvas.add(image);
       if (index !== undefined) {
         this.canvas.moveTo(image, index);
@@ -442,11 +532,11 @@ export default class TemplateBuilderApp extends React.Component {
     });
   }
 
-  addWebsite(url, options, index) {
-    fabric.util.loadImage(url, (img) => {
+  addWebsite(url, thumbnail, options, index) {
+    fabric.util.loadImage(thumbnail, (img) => {
       const website = new Website(img);
       const defaultOptions = {
-        scalingStyle: 'free',
+        scalingStyle: SCALING_STYLES.RESET,
         originX: 'center',
         originY: 'center',
         url: url,
@@ -498,6 +588,7 @@ export default class TemplateBuilderApp extends React.Component {
     const object = this.canvas.getActiveObject();
     if (object) {
       object.arrangement = value;
+      object.setAngle(0);
       this.applyArrangement(object);
       this.applyScalingStyle(object);
       object.setCoords();
@@ -633,8 +724,8 @@ export default class TemplateBuilderApp extends React.Component {
     });
   }
 
-  doneInputWebsite(url) {
-    this.addWebsite(url);
+  doneInputWebsite(website) {
+    this.addWebsite(website.url, website.thumbnail);
     this.hideInputWebsiteDialog();
   }
 
@@ -671,17 +762,17 @@ export default class TemplateBuilderApp extends React.Component {
     const objects = this.canvas.toJSON().objects;
     this.zoomObjects(objects, 3, false);
     const requestData = {
-      template: {
-        name: name,
-        objects: objects,
-      },
+      content_name: name,
+      objects: objects,
     };
-    console.log(JSON.stringify(objects));
+    // console.log(JSON.stringify(objects));
 
     api.post(API.TEMPLATE, requestData).done(response => {
-      if (response.information === 'success') {
-        this.hideInputTemplateNameDialog();
-      }
+      this.hideInputTemplateNameDialog();
+      $.notify('Save template success', {
+        className: 'success',
+        elementPosition: 'bottom right',
+      });
     }).fail(error => {
       $.notify(error.message || 'Fail to save template', {
         className: 'error',

@@ -28,12 +28,19 @@ export default class InputVideoDialog extends React.Component {
   done() {
     if (this.state.selectedFile) {
       const data = new FormData();
-      data.append(this.state.selectedFile);
+      data.append('uploadfile', this.state.selectedFile);
+      this.setState({
+        isLoading: true,
+      });
       api.uploadPost(API.UPLOAD, data).done(response => {
-        const video = response.result.media;
+        const video = response.asset;
         this.props.done(video.url);
       }).fail((error) => {
         console.log(error);
+      }).always(()=> {
+        this.setState({
+          isLoading: false,
+        });
       });
     } else {
       this.props.done(this.state.url);
@@ -49,14 +56,6 @@ export default class InputVideoDialog extends React.Component {
         <Modal.Body>
           <form className="form-horizontal">
             <div className="form-group">
-              <label className="control-label col-xs-2">URL</label>
-              <div className="col-xs-10">
-                <input className="form-control" value={this.state.url}
-                       placeholder="Input Video URL" onChange={this.changeUrl.bind(this)}
-                       ref="inputUrl"/>
-              </div>
-            </div>
-            <div className="form-group">
               <label className="control-label col-xs-2">Upload</label>
               <div className="col-xs-10 file-upload-control">
                 <label className="btn btn-primary btn-file">
@@ -70,7 +69,7 @@ export default class InputVideoDialog extends React.Component {
           </form>
         </Modal.Body>
         <Modal.Footer>
-          <button className="btn btn-primary"
+          <button className="btn btn-primary" disabled={this.state.isLoading}
                   onClick={this.done.bind(this)}>Ok
           </button>
         </Modal.Footer>

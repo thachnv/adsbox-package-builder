@@ -1,7 +1,7 @@
 export const SCALING_STYLES = {
-  FULL: 'full',
+  FILL: 'fill',
   FIT: 'fit',
-  FREE: 'free',
+  RESET: 'reset',
 };
 
 export const ARRANGEMENT = {
@@ -13,16 +13,16 @@ export const ARRANGEMENT = {
 };
 
 export const SCALING_STYLE_BUTTONS = [
-  {label: 'Full', key: SCALING_STYLES.FULL},
+  {label: 'Fill', key: SCALING_STYLES.FILL},
   {label: 'Fit', key: SCALING_STYLES.FIT},
-  {label: 'Free', key: SCALING_STYLES.FREE},
+  {label: 'Reset', key: SCALING_STYLES.RESET},
 ];
 
 
 export const API = {
-  UPLOAD: 'media',
-  WEBPAGE_SCREENSHOT: 'webpage/screenshot',
-  TEMPLATE: 'template',
+  UPLOAD: 'asset/media/upload',
+  WEBPAGE_SCREENSHOT: 'asset/web',
+  TEMPLATE: 'content',
 };
 
 export const INPUT_WEBSITE_URL_FORM_VALIDATOR = {

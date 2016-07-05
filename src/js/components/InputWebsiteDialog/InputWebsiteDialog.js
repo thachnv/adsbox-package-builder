@@ -16,8 +16,8 @@ export default class UploadDialog extends React.Component {
     api.post(API.WEBPAGE_SCREENSHOT, {
       url: this.state.url,
     }).done(response => {
-      const webpageScreenshotUrl = response.result;
-      this.props.done(webpageScreenshotUrl);
+      const website = response.asset;
+      this.props.done(website);
     });
   }
 

@@ -37,10 +37,16 @@ export default class UploadDialog extends React.Component {
   done() {
     if (this.state.selectedFile) {
       const data = new FormData();
-      data.append(this.state.selectedFile);
+      data.append('uploadfile', this.state.selectedFile);
+      this.setState({
+        isLoading: true,
+      });
       api.uploadPost(API.UPLOAD, data).done(response => {
-        const image = response.result.media;
+        const image = response.asset;
         this.props.done(image.url);
+        this.setState({
+          isLoading: false,
+        });
       }).fail((error) => {
         console.log(error);
       });
@@ -79,7 +85,7 @@ export default class UploadDialog extends React.Component {
           </form>
         </Modal.Body>
         <Modal.Footer>
-          <button className="btn btn-primary"
+          <button className="btn btn-primary" disabled={this.state.isLoading}
                   onClick={this.done.bind(this)}>Ok
           </button>
         </Modal.Footer>
