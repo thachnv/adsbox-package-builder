@@ -400,7 +400,7 @@ export default class TemplateBuilderApp extends React.Component {
   applyScalingStyle(object) {
     switch (object.scalingStyle) {
       case SCALING_STYLES.FILL:
-        this.fillObject(object);
+        this.fullObject(object);
         break;
       case SCALING_STYLES.FIT:
         this.fitObject(object);
@@ -494,7 +494,9 @@ export default class TemplateBuilderApp extends React.Component {
         this.toCenter(image);
         this.toMiddle(image);
       }
-
+      if (image.getWidth() > this.canvas.width || image.getHeight() > this.canvas.height) {
+        this.fitObject(image);
+      }
       // image.setCoords();
       this.canvas.add(image);
       if (index !== undefined) {
@@ -525,6 +527,9 @@ export default class TemplateBuilderApp extends React.Component {
         this.toMiddle(video);
       }
       video.setCoords();
+      if (video.getWidth() > this.canvas.width || video.getHeight() > this.canvas.height) {
+        this.fitObject(video);
+      }
       this.canvas.add(video);
       if (index !== undefined) {
         this.canvas.moveTo(video, index);
@@ -546,6 +551,9 @@ export default class TemplateBuilderApp extends React.Component {
         website.arrangement = ARRANGEMENT.CENTER_MIDDLE;
         this.toCenter(website);
         this.toMiddle(website);
+      }
+      if (website.getWidth() > this.canvas.width || website.getHeight() > this.canvas.height) {
+        this.fitObject(website);
       }
       this.canvas.add(website);
       if (index !== undefined) {
@@ -590,7 +598,8 @@ export default class TemplateBuilderApp extends React.Component {
       object.arrangement = value;
       object.setAngle(0);
       this.applyArrangement(object);
-      this.applyScalingStyle(object);
+      this.fillObject(object);
+      // this.applyScalingStyle(object);
       object.setCoords();
       this.canvas.renderAll();
     }

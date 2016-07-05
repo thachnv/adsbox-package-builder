@@ -13,11 +13,18 @@ export default class UploadDialog extends React.Component {
   }
 
   done() {
+    this.setState({
+      isLoading: true,
+    });
     api.post(API.WEBPAGE_SCREENSHOT, {
       url: this.state.url,
     }).done(response => {
       const website = response.asset;
       this.props.done(website);
+    }).always(() => {
+      this.setState({
+        isLoading: false,
+      });
     });
   }
 
@@ -48,7 +55,7 @@ export default class UploadDialog extends React.Component {
           </form>
         </Modal.Body>
         <Modal.Footer>
-          <button className="btn btn-primary"
+          <button className="btn btn-primary" disabled={this.state.isLoading}
                   onClick={this.done.bind(this)}>Ok
           </button>
         </Modal.Footer>

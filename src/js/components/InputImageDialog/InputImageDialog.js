@@ -44,11 +44,12 @@ export default class UploadDialog extends React.Component {
       api.uploadPost(API.UPLOAD, data).done(response => {
         const image = response.asset;
         this.props.done(image.url);
+      }).fail((error) => {
+        console.log(error);
+      }).always(()=> {
         this.setState({
           isLoading: false,
         });
-      }).fail((error) => {
-        console.log(error);
       });
     } else {
       this.props.done(this.state.url);

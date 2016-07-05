@@ -1,4 +1,5 @@
 import '../../bower_components/bootstrap/dist/css/bootstrap.css';
+import '../../bower_components/bootstrap/dist/css/bootstrap-theme.min.css';
 import '!script!../../bower_components/jquery/dist/jquery.js';
 import '!script!../../bower_components/bootstrap/dist/js/bootstrap.js';
 import '!script!../../bower_components/notifyjs/dist/notify.js';
