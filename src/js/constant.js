@@ -1,3 +1,8 @@
+export const ActionTypes = {
+  SELECT_MEDIA: 'SELECT_MEDIA',
+  GET_MEDIA_SUCCESS: 'GET_MEDIA_SUCCESS',
+  REMOVE_SELECTED_MEDIA: 'REMOVE_SELECTED_MEDIA',
+};
 export const SCALING_STYLES = {
   FILL: 'fill',
   FIT: 'fit',
@@ -5,6 +10,7 @@ export const SCALING_STYLES = {
 };
 
 export const ARRANGEMENT = {
+  FULL_SCREEN: 'fullscreen',
   CENTER_TOP: 'centertop',
   CENTER_BOTTOM: 'centerbottom',
   MIDDLE_LEFT: 'middleleft',
@@ -18,11 +24,11 @@ export const SCALING_STYLE_BUTTONS = [
   {label: 'Reset', key: SCALING_STYLES.RESET},
 ];
 
-
 export const API = {
   UPLOAD: 'asset/media/upload',
   WEBPAGE_SCREENSHOT: 'asset/web',
   TEMPLATE: 'content',
+  MEDIA: 'asset',
 };
 
 export const INPUT_WEBSITE_URL_FORM_VALIDATOR = {
@@ -51,3 +57,36 @@ export const INPUT_TEMPLATE_NAME_FORM_VALIDATOR = {
     },
   ],
 };
+
+export const ARRANGEMENT_BUTTONS = [
+  {
+    label: 'Full Screen',
+    key: ARRANGEMENT.FULL_SCREEN,
+    className: 'arrangement-full-button',
+  },
+  {
+    label: 'Center',
+    key: ARRANGEMENT.CENTER_MIDDLE,
+    className: 'arrangement-center-button',
+  },
+  {
+    label: 'Left',
+    key: ARRANGEMENT.MIDDLE_LEFT,
+    className: 'arrangement-left-button',
+  },
+  {
+    label: 'Right',
+    key: ARRANGEMENT.MIDDLE_RIGHT,
+    className: 'arrangement-right-button',
+  },
+  {
+    label: 'Top',
+    key: ARRANGEMENT.CENTER_TOP,
+    className: 'arrangement-top-button',
+  },
+  {
+    label: 'Bottom',
+    key: ARRANGEMENT.CENTER_BOTTOM,
+    className: 'arrangement-bottom-button',
+  },
+];

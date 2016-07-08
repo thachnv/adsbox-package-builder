@@ -6,14 +6,22 @@ import TextProperties from '../TextProperties/TextProperties.js';
 import ImageProperties from '../ImageProperties/ImageProperties.js';
 import VideoProperties from '../VideoProperties/VideoProperties.js';
 import WebProperties from '../WebProperties/WebProperties.js';
-import {ARRANGEMENT, SCALING_STYLES, API} from '../../constant.js';
+import { ARRANGEMENT, SCALING_STYLES, API, ARRANGEMENT_BUTTONS } from '../../constant.js';
 import InputVideoDialog from '../InputVideoDialog/InputVideoDialog';
 import InputWebsiteDialog from '../InputWebsiteDialog/InputWebsiteDialog';
 import InputImageDialog from '../InputImageDialog/InputImageDialog';
 import InputTemplateNameDialog from '../InputTemplateNameDialog/InputTemplateNameDialog';
 import classNames from 'classnames';
 import api from '../../utils/api';
+import ObjectUtil from '../../utils/ObjectUtil';
 
+function parseUrlArgs(href) {
+  if (href) {
+    const _tmp = href.split('/');
+    return _tmp[_tmp.length - 1];
+  }
+  return null;
+}
 export default class TemplateBuilderApp extends React.Component {
   constructor() {
     super();
@@ -25,138 +33,74 @@ export default class TemplateBuilderApp extends React.Component {
       isPreview: false,
     };
     this.activeObject = null;
-    this.arrangementButtons = [
-      {label: 'Center', key: ARRANGEMENT.CENTER_MIDDLE, className: 'arrangement-center-button'},
-      {label: 'Left', key: ARRANGEMENT.MIDDLE_LEFT, className: 'arrangement-left-button'},
-      {label: 'Right', key: ARRANGEMENT.MIDDLE_RIGHT, className: 'arrangement-right-button'},
-      {label: 'Top', key: ARRANGEMENT.CENTER_TOP, className: 'arrangement-top-button'},
-      {label: 'Bottom', key: ARRANGEMENT.CENTER_BOTTOM, className: 'arrangement-bottom-button'},
-    ];
+
+    // Add objects methods
+    this.showInputImageDialog = this.showInputImageDialog.bind(this);
+    this.showInputVideoDialog = this.showInputVideoDialog.bind(this);
+    this.showInputWebsiteDialog = this.showInputWebsiteDialog.bind(this);
+    this.clickAddText = this.clickAddText.bind(this);
+
+    // Canvas control methods
+    this.clearCanvas = this.clearCanvas.bind(this);
+    this.removeActiveObject = this.removeActiveObject.bind(this);
+    this.showInputTemplateNameDialog = this.showInputTemplateNameDialog.bind(this);
+
+    // Update properties methods
+    this.updateText = this.updateText.bind(this);
+    this.updateScalingStyle = this.updateScalingStyle.bind(this);
+    this.updateWebsite = this.updateWebsite.bind(this);
+    this.updateArrangement = this.updateArrangement.bind(this);
+
+    this.preview = this.preview.bind(this);
+
+    this.sendToBack = this.sendToBack.bind(this);
+    this.sendBackWards = this.sendBackWards.bind(this);
+    this.bringToFront = this.bringToFront.bind(this);
+    this.bringForward = this.bringForward.bind(this);
+    this.doneInputImage = this.doneInputImage.bind(this);
+    this.doneInputVideo = this.doneInputVideo.bind(this);
+    this.doneInputWebsite = this.doneInputWebsite.bind(this);
+    this.doneInputTemplateName = this.doneInputTemplateName.bind(this);
+    this.hideInputImageDialog = this.hideInputImageDialog.bind(this);
+    this.hideInputVideoDialog = this.hideInputVideoDialog.bind(this);
+    this.hideInputWebsiteDialog = this.hideInputWebsiteDialog.bind(this);
+    this.hideInputTemplateNameDialog = this.hideInputTemplateNameDialog.bind(this);
   }
 
   componentDidMount() {
-    this.canvas = new fabric.Canvas(this.refs.mainCanvas, {preserveObjectStacking: true,});
+    this.canvas = new fabric.Canvas(this.refs.mainCanvas, {
+      preserveObjectStacking: true,
+    });
     this.canvas.on('object:selected', this.getActiveObject.bind(this));
-    // const o = [{
-    //   "type": "video",
-    //   "originX": "center",
-    //   "originY": "center",
-    //   "left": 960,
-    //   "top": 540,
-    //   "width": 480,
-    //   "height": 360,
-    //   "fill": "rgb(0,0,0)",
-    //   "stroke": null,
-    //   "strokeWidth": 0,
-    //   "strokeDashArray": null,
-    //   "strokeLineCap": "butt",
-    //   "strokeLineJoin": "miter",
-    //   "strokeMiterLimit": 10,
-    //   "scaleX": 3,
-    //   "scaleY": 3,
-    //   "angle": 30,
-    //   "flipX": false,
-    //   "flipY": false,
-    //   "opacity": 1,
-    //   "shadow": null,
-    //   "visible": true,
-    //   "clipTo": null,
-    //   "backgroundColor": "",
-    //   "fillRule": "nonzero",
-    //   "globalCompositeOperation": "source-over",
-    //   "transformMatrix": null,
-    //   "skewX": 0,
-    //   "skewY": 0,
-    //   "src": "http://html5demos.com/assets/dizzy.mp4",
-    //   "filters": [],
-    //   "resizeFilters": [],
-    //   "crossOrigin": "",
-    //   "alignX": "none",
-    //   "alignY": "none",
-    //   "meetOrSlice": "meet"
-    // }, {
-    //   "type": "website",
-    //   "originX": "center",
-    //   "originY": "center",
-    //   "left": 1332,
-    //   "top": 616.5,
-    //   "width": 440,
-    //   "height": 330,
-    //   "fill": "rgb(0,0,0)",
-    //   "stroke": null,
-    //   "strokeWidth": 0,
-    //   "strokeDashArray": null,
-    //   "strokeLineCap": "butt",
-    //   "strokeLineJoin": "miter",
-    //   "strokeMiterLimit": 10,
-    //   "scaleX": 2.55,
-    //   "scaleY": 2.55,
-    //   "angle": 0,
-    //   "flipX": false,
-    //   "flipY": false,
-    //   "opacity": 1,
-    //   "shadow": null,
-    //   "visible": true,
-    //   "clipTo": null,
-    //   "backgroundColor": "",
-    //   "fillRule": "nonzero",
-    //   "globalCompositeOperation": "source-over",
-    //   "transformMatrix": null,
-    //   "skewX": 0,
-    //   "skewY": 0,
-    //   "src": "https://support.files.wordpress.com/2009/07/pigeony.jpg?w=688",
-    //   "url": "https://support.files.wordpress.com/2009/07/pigeony.jpg?w=688",
-    //   "filters": [],
-    //   "resizeFilters": [],
-    //   "crossOrigin": "",
-    //   "alignX": "none",
-    //   "alignY": "none",
-    //   "meetOrSlice": "meet"
-    // }, {
-    //   "type": "text",
-    //   "originX": "center",
-    //   "originY": "center",
-    //   "left": 500,
-    //   "top": 540,
-    //   "width": 123.02,
-    //   "height": 53.74,
-    //   "fill": "#ba0000",
-    //   "stroke": null,
-    //   "strokeWidth": 1,
-    //   "strokeDashArray": null,
-    //   "strokeLineCap": "butt",
-    //   "strokeLineJoin": "miter",
-    //   "strokeMiterLimit": 10,
-    //   "scaleX": 3,
-    //   "scaleY": 3,
-    //   "angle": 10,
-    //   "flipX": false,
-    //   "flipY": false,
-    //   "opacity": 1,
-    //   "shadow": null,
-    //   "visible": true,
-    //   "clipTo": null,
-    //   "backgroundColor": "",
-    //   "fillRule": "nonzero",
-    //   "globalCompositeOperation": "source-over",
-    //   "transformMatrix": null,
-    //   "skewX": 0,
-    //   "skewY": 0,
-    //   "text": "Hello",
-    //   "fontSize": 41,
-    //   "fontWeight": "bold",
-    //   "fontFamily": "Courier New",
-    //   "fontStyle": "italic",
-    //   "lineHeight": 1.16,
-    //   "textDecoration": "",
-    //   "textAlign": "left",
-    //   "textBackgroundColor": "",
-    //   "animation": "leftToRight"
-    // }];
-    // this.zoomObjects(o, 1 / 3);
-    // this.redraw(o);
-    // // console.log(o);
-    // this.canvas.loadFromJSON(JSON.stringify(o));
+    // const id = window.selectedPackage;
+    const id = parseUrlArgs(window.location.href);
+    console.log(id);
+    if (id) {
+      api.get(`${API.TEMPLATE}/${id}`).done((response) => {
+        const objects = response.content.objects;
+        ObjectUtil.zoom(objects, 1 / 3);
+        this.redraw(objects);
+      });
+    }
+  }
+
+  getActiveObject() {
+    this.activeObject = this.canvas.getActiveObject();
+    if (!this.activeObject) return '';
+
+    this.setState({
+      activePropType: this.activeObject.type,
+    });
+
+    return this.activeObject;
+  }
+
+  setActiveProp(name, value) {
+    const object = this.canvas.getActiveObject();
+    if (!object) return;
+
+    object.set(name, value).setCoords();
+    this.canvas.renderAll();
   }
 
   redraw(objects) {
@@ -198,25 +142,6 @@ export default class TemplateBuilderApp extends React.Component {
     });
   }
 
-  getActiveObject() {
-    this.activeObject = this.canvas.getActiveObject();
-    if (!this.activeObject) return '';
-
-    this.setState({
-      activePropType: this.activeObject.type,
-    });
-
-    return this.activeObject;
-  }
-
-  setActiveProp(name, value) {
-    const object = this.canvas.getActiveObject();
-    if (!object) return;
-
-    object.set(name, value).setCoords();
-    this.canvas.renderAll();
-  }
-
   updateText(propName, value) {
     this.setActiveProp(propName, value);
   }
@@ -227,127 +152,72 @@ export default class TemplateBuilderApp extends React.Component {
 
   fitObject(object) {
     const arrangement = object.arrangement;
-    let scale;
     if (arrangement === ARRANGEMENT.CENTER_TOP) {
-      scale = (this.canvas.height / 2 ) / object.height; // should be original height, don't use getHeight()
-      object.set('scaleX', scale);
-      object.set('scaleY', scale);
-      this.toTop(object);
-      this.toCenter(object);
+      ObjectUtil.fit(object, this.canvas.width, this.canvas.height / 2);
+      ObjectUtil.alignTop(object, this.canvas.height);
+      // ObjectUtil.alignCenter(object, this.canvas.width);
+      object.centerH();
     }
     if (arrangement === ARRANGEMENT.CENTER_BOTTOM) {
-      scale = (this.canvas.height / 2 ) / object.height;
-      object.set('scaleX', scale);
-      object.set('scaleY', scale);
-      this.toBottom(object);
-      this.toCenter(object);
+      ObjectUtil.fit(object, this.canvas.width, this.canvas.height / 2);
+      ObjectUtil.alignBottom(object, this.canvas.height);
+      object.centerH();
+      // ObjectUtil.alignCenter(object, this.canvas.width);
     }
     if (arrangement === ARRANGEMENT.MIDDLE_LEFT) {
-      scale = (this.canvas.width / 2 ) / object.width;
-      object.set('scaleX', scale);
-      object.set('scaleY', scale);
-      this.toLeft(object);
-      this.toMiddle(object);
+      ObjectUtil.fit(object, this.canvas.width / 2, this.canvas.height);
+      ObjectUtil.alignLeft(object, this.canvas.width);
+      // ObjectUtil.alignMiddle(object, this.canvas.height);
+      object.centerV();
     }
     if (arrangement === ARRANGEMENT.MIDDLE_RIGHT) {
-      scale = (this.canvas.width / 2 ) / object.width;
-      object.set('scaleX', scale);
-      object.set('scaleY', scale);
-      this.toRight(object);
-      this.toMiddle(object);
+      ObjectUtil.fit(object, this.canvas.width / 2, this.canvas.height);
+      ObjectUtil.alignRight(object, this.canvas.width);
+      // ObjectUtil.alignMiddle(object, this.canvas.height);
+      // object.adjustPosition('right');
+      object.centerV();
     }
     if (arrangement === ARRANGEMENT.CENTER_MIDDLE) {
-      scale = this.canvas.height / object.height;
-      object.set('scaleX', scale);
-      object.set('scaleY', scale);
-      this.toCenter(object);
-      this.toMiddle(object);
+      ObjectUtil.fit(object, this.canvas.width, this.canvas.height);
+      object.center();
+      // ObjectUtil.alignCenter(object, this.canvas.width);
+      // ObjectUtil.alignMiddle(object, this.canvas.height);
     }
   }
-
-  // getFillScale(containerWidth, containerHeight, objectWidth, objectHeight) {
-  //   let scale = this.canvas.width / object.width;
-  //   const containerWidth = this.canvas.width;
-  //   const containerHeight = this.canvas.height / 2;
-  //   if (containerWidth / object.width > containerHeight / object.height) {
-  //     scale = this.canvas.width / object.width;
-  //   } else {
-  //     scale = this.canvas.height / object.height;
-  //   }
-  // }
 
   fillObject(object) {
     const arrangement = object.arrangement;
     if (arrangement === ARRANGEMENT.CENTER_TOP || arrangement === ARRANGEMENT.CENTER_BOTTOM) {
-      let scale = this.canvas.width / object.width;
-      const containerWidth = this.canvas.width;
-      const containerHeight = this.canvas.height / 2;
-      if (containerWidth / object.width > containerHeight / object.height) {
-        scale = this.canvas.width / object.width;
-      } else {
-        scale = this.canvas.height / object.height;
-      }
-
-      // const scaleY = (this.canvas.height / 2 ) / object.height; // should be original height, don't use getHeight()
-      // const scaleY = this.canvas.width / object.height; // should be original height, don't use getHeight()
-      object.set('scaleX', scale);
-      object.set('scaleY', scale);
+      ObjectUtil.fill(object, this.canvas.width, this.canvas.height / 2);
       this.toTop(object);
       this.toCenter(object);
     }
     if (arrangement === ARRANGEMENT.CENTER_BOTTOM) {
-      // const scaleX = this.canvas.width / object.width;
-      // const scaleY = (this.canvas.height / 2 ) / object.height; // should be original height, don't use getHeight()
-      let scale = this.canvas.width / object.width;
-      const containerWidth = this.canvas.width;
-      const containerHeight = this.canvas.height / 2;
-      if (containerWidth / object.width > containerHeight / object.height) {
-        scale = this.canvas.width / object.width;
-      } else {
-        scale = this.canvas.height / object.height;
-      }
-
-      object.set('scaleX', scale);
-      object.set('scaleY', scale);
+      ObjectUtil.fill(object, this.canvas.width, this.canvas.height / 2);
       this.toBottom(object);
       this.toCenter(object);
     }
     if (arrangement === ARRANGEMENT.MIDDLE_LEFT) {
-      let scale = this.canvas.width / object.width;
-      const containerWidth = this.canvas.width / 2;
-      const containerHeight = this.canvas.height;
-      if (containerWidth / object.width > containerHeight / object.height) {
-        scale = this.canvas.width / object.width;
-      } else {
-        scale = this.canvas.height / object.height;
-      }
-
-      // const scaleX = (this.canvas.width / 2 ) / object.width;
-      // const scaleY = this.canvas.height / object.height;
-      object.set('scaleX', scale);
-      object.set('scaleY', scale);
-      this.toLeft(object);
-      this.toMiddle(object);
+      ObjectUtil.fill(object, this.canvas.width / 2, this.canvas.height);
+      // ObjectUtil.alignLeft(object);
+      // this.toMiddle(object);
     }
     if (arrangement === ARRANGEMENT.MIDDLE_RIGHT) {
-      let scale = this.canvas.width / object.width;
-      const containerWidth = this.canvas.width / 2;
-      const containerHeight = this.canvas.height;
-      if (containerWidth / object.width > containerHeight / object.height) {
-        scale = this.canvas.width / object.width;
-      } else {
-        scale = this.canvas.height / object.height;
-      }
-      object.set('scaleX', scale);
-      object.set('scaleY', scale);
-      this.toRight(object);
+      ObjectUtil.fill(object, this.canvas.width / 2, this.canvas.height);
+      ObjectUtil.alignRight(object, this.canvas.width);
       this.toMiddle(object);
     }
     if (arrangement === ARRANGEMENT.CENTER_MIDDLE) {
-      const scaleX = this.canvas.width / object.width;
-      const scaleY = this.canvas.height / object.height;
-      object.set('scaleX', scaleX);
-      object.set('scaleY', scaleY);
+      let scale = this.canvas.width / object.width;
+      const containerWidth = this.canvas.width / 2;
+      const containerHeight = this.canvas.height;
+      if (containerWidth / object.width > containerHeight / object.height) {
+        scale = this.canvas.width / object.width;
+      } else {
+        scale = this.canvas.height / object.height;
+      }
+      object.set('scaleX', scale);
+      object.set('scaleY', scale);
       this.toCenter(object);
       this.toMiddle(object);
     }
@@ -356,38 +226,31 @@ export default class TemplateBuilderApp extends React.Component {
   fullObject(object) {
     const arrangement = object.arrangement;
     if (arrangement === ARRANGEMENT.CENTER_TOP) {
-      const scaleX = this.canvas.width / object.width;
-      const scaleY = (this.canvas.height / 2 ) / object.height; // should be original height, don't use getHeight()
-      object.set('scaleX', scaleX);
-      object.set('scaleY', scaleY);
-      this.toTop(object);
-      this.toCenter(object);
+      ObjectUtil.full(object, this.canvas.width, this.canvas.height / 2);
+      ObjectUtil.alignTop(object, this.canvas.height);
+      ObjectUtil.alignCenter(object, this.canvas.width);
     }
     if (arrangement === ARRANGEMENT.CENTER_BOTTOM) {
-      const scaleX = this.canvas.width / object.width;
-      const scaleY = (this.canvas.height / 2 ) / object.height; // should be original height, don't use getHeight()
-      object.set('scaleX', scaleX);
-      object.set('scaleY', scaleY);
-      this.toBottom(object);
-      this.toCenter(object);
+      ObjectUtil.full(object, this.canvas.width, this.canvas.height / 2);
+      ObjectUtil.alignBottom(object, this.canvas.height);
+      ObjectUtil.alignCenter(object, this.canvas.width);
     }
     if (arrangement === ARRANGEMENT.MIDDLE_LEFT) {
-      const scaleX = (this.canvas.width / 2 ) / object.width;
-      const scaleY = this.canvas.height / object.height;
-      object.set('scaleX', scaleX);
-      object.set('scaleY', scaleY);
-      this.toLeft(object);
-      this.toMiddle(object);
+      ObjectUtil.full(object, this.canvas.width / 2, this.canvas.height);
+      ObjectUtil.alignLeft(object, this.canvas.width);
+      ObjectUtil.alignMiddle(object, this.canvas.height);
     }
     if (arrangement === ARRANGEMENT.MIDDLE_RIGHT) {
-      const scaleX = (this.canvas.width / 2 ) / object.width;
-      const scaleY = this.canvas.height / object.height;
-      object.set('scaleX', scaleX);
-      object.set('scaleY', scaleY);
-      this.toRight(object);
-      this.toMiddle(object);
+      ObjectUtil.full(object, this.canvas.width / 2, this.canvas.height);
+      ObjectUtil.alignRight(object, this.canvas.width);
+      ObjectUtil.alignMiddle(object, this.canvas.height);
     }
     if (arrangement === ARRANGEMENT.CENTER_MIDDLE) {
+      ObjectUtil.full(object, this.canvas.width, this.canvas.height);
+      ObjectUtil.alignCenter(object, this.canvas.width);
+      ObjectUtil.alignMiddle(object, this.canvas.height);
+    }
+    if (arrangement === ARRANGEMENT.FULL_SCREEN) {
       const scaleX = this.canvas.width / object.width;
       const scaleY = this.canvas.height / object.height;
       object.set('scaleX', scaleX);
@@ -401,13 +264,14 @@ export default class TemplateBuilderApp extends React.Component {
     switch (object.scalingStyle) {
       case SCALING_STYLES.FILL:
         this.fullObject(object);
+        // this.applyArrangement(object);
         break;
       case SCALING_STYLES.FIT:
         this.fitObject(object);
         break;
       case SCALING_STYLES.RESET:
-        object.scaleX = 1;
-        object.scaleY = 1;
+        object.set('scaleX', 1);
+        object.set('scaleY', 1);
         break;
       default:
         break;
@@ -425,23 +289,17 @@ export default class TemplateBuilderApp extends React.Component {
   }
 
   toCenter(object) {
-    const _width = object.arrangement === ARRANGEMENT.MIDDLE_LEFT || object.arrangement === ARRANGEMENT.MIDDLE_RIGHT ?
+    const width = object.arrangement === ARRANGEMENT.MIDDLE_LEFT ||
+    object.arrangement === ARRANGEMENT.MIDDLE_RIGHT ?
     this.canvas.width / 2 : this.canvas.width;
-    object.set('left', _width / 2);
+    object.set('left', width / 2);
   }
 
   toMiddle(object) {
-    const _height = object.arrangement === ARRANGEMENT.CENTER_TOP || object.arrangement === ARRANGEMENT.CENTER_BOTTOM ?
+    const height = object.arrangement === ARRANGEMENT.CENTER_TOP ||
+    object.arrangement === ARRANGEMENT.CENTER_BOTTOM ?
     this.canvas.height / 2 : this.canvas.height;
-    object.set('top', _height / 2);
-  }
-
-  toLeft(object) {
-    object.set('left', this.canvas.width / 2 - object.getWidth() / 2);
-  }
-
-  toRight(object) {
-    object.set('left', this.canvas.width / 2 + object.getWidth() / 2);
+    object.set('top', height / 2);
   }
 
   toTop(object) {
@@ -484,20 +342,23 @@ export default class TemplateBuilderApp extends React.Component {
     fabric.Image.fromURL(url, (image) => {
       const defaultOptions = {
         scalingStyle: SCALING_STYLES.RESET,
-        originX: 'center',
-        originY: 'center',
+        // originX: 'center',
+        // originY: 'center',
       };
       image.set(options || defaultOptions);
 
       if (!options) {
-        image.arrangement = ARRANGEMENT.CENTER_MIDDLE;
-        this.toCenter(image);
-        this.toMiddle(image);
+        image.set('arrangement', ARRANGEMENT.CENTER_MIDDLE);
+        // ObjectUtil.alignMiddle(image, this.canvas.height);
+        // ObjectUtil.alignCenter(image, this.canvas.width);
+        // this.toCenter(image);
+        // this.toMiddle(image);
+        image.center();
       }
       if (image.getWidth() > this.canvas.width || image.getHeight() > this.canvas.height) {
         this.fitObject(image);
       }
-      // image.setCoords();
+      image.setCoords();
       this.canvas.add(image);
       if (index !== undefined) {
         this.canvas.moveTo(image, index);
@@ -512,19 +373,27 @@ export default class TemplateBuilderApp extends React.Component {
     videoElement.appendChild(sourceMP4);
     videoElement.load();
 
+    this.setState({
+      isLoading: true,
+    });
+
     videoElement.addEventListener('loadeddata', () => {
+      this.setState({
+        isLoading: false,
+      });
       videoElement.width = videoElement.videoWidth;
       videoElement.height = videoElement.videoHeight;
       const defaultOptions = {
-        originX: 'center',
-        originY: 'center',
+        // originX: 'center',
+        // originY: 'center',
         src: url,
       };
       const video = new Video(videoElement, options || defaultOptions);
       if (!options) {
         video.arrangement = ARRANGEMENT.CENTER_MIDDLE;
-        this.toCenter(video);
-        this.toMiddle(video);
+        // this.toCenter(video);
+        // this.toMiddle(video);
+        video.center();
       }
       video.setCoords();
       if (video.getWidth() > this.canvas.width || video.getHeight() > this.canvas.height) {
@@ -544,7 +413,7 @@ export default class TemplateBuilderApp extends React.Component {
         scalingStyle: SCALING_STYLES.RESET,
         originX: 'center',
         originY: 'center',
-        url: url,
+        url,
       };
       website.set(options || defaultOptions);
       if (!options) {
@@ -564,25 +433,35 @@ export default class TemplateBuilderApp extends React.Component {
 
   applyArrangement(object) {
     switch (object.arrangement) {
+      case ARRANGEMENT.FULL_SCREEN:
+        this.toCenter(object);
+        this.toMiddle(object);
+        this.fullObject(object);
+        break;
       case ARRANGEMENT.CENTER_MIDDLE:
         this.toCenter(object);
         this.toMiddle(object);
+        this.fillObject(object);
         break;
       case ARRANGEMENT.MIDDLE_LEFT:
-        this.toMiddle(object);
-        this.toLeft(object);
+        ObjectUtil.fill(object, this.canvas.width / 2, this.canvas.height);
+        ObjectUtil.alignMiddle(object, this.canvas.height);
+        ObjectUtil.alignLeft(object, this.canvas.width);
         break;
       case ARRANGEMENT.MIDDLE_RIGHT:
-        this.toMiddle(object);
-        this.toRight(object);
+        ObjectUtil.fill(object, this.canvas.width / 2, this.canvas.height);
+        ObjectUtil.alignMiddle(object, this.canvas.height);
+        ObjectUtil.alignRight(object, this.canvas.width);
         break;
       case ARRANGEMENT.CENTER_TOP:
-        this.toCenter(object);
-        this.toTop(object);
+        ObjectUtil.fill(object, this.canvas.width, this.canvas.height / 2);
+        ObjectUtil.alignCenter(object, this.canvas.width);
+        ObjectUtil.alignTop(object, this.canvas.height);
         break;
       case ARRANGEMENT.CENTER_BOTTOM:
-        this.toCenter(object);
-        this.toBottom(object);
+        ObjectUtil.fill(object, this.canvas.width, this.canvas.height / 2);
+        ObjectUtil.alignCenter(object, this.canvas.width);
+        ObjectUtil.alignBottom(object, this.canvas.height);
         break;
       default:
         break;
@@ -598,7 +477,6 @@ export default class TemplateBuilderApp extends React.Component {
       object.arrangement = value;
       object.setAngle(0);
       this.applyArrangement(object);
-      this.fillObject(object);
       // this.applyScalingStyle(object);
       object.setCoords();
       this.canvas.renderAll();
@@ -698,11 +576,6 @@ export default class TemplateBuilderApp extends React.Component {
     this.canvas.clear();
   }
 
-  toJson() {
-    console.log(JSON.stringify(this.canvas));
-  }
-
-
   // Input dialogs
   hideInputVideoDialog() {
     this.setState({
@@ -772,11 +645,10 @@ export default class TemplateBuilderApp extends React.Component {
     this.zoomObjects(objects, 3, false);
     const requestData = {
       content_name: name,
-      objects: objects,
+      objects,
     };
-    // console.log(JSON.stringify(objects));
 
-    api.post(API.TEMPLATE, requestData).done(response => {
+    api.post(API.TEMPLATE, requestData).done(() => {
       this.hideInputTemplateNameDialog();
       $.notify('Save template success', {
         className: 'success',
@@ -790,126 +662,153 @@ export default class TemplateBuilderApp extends React.Component {
     });
   }
 
-  zoomObjects(objects, factor, render) {
-    objects.forEach(object => {
-      const scaleX = object.scaleX;
-      const scaleY = object.scaleY;
-      const left = object.left;
-      const top = object.top;
-
-      const tempScaleX = scaleX * factor;
-      const tempScaleY = scaleY * factor;
-      const tempLeft = left * factor;
-      const tempTop = top * factor;
-
-      object.scaleX = tempScaleX;
-      object.scaleY = tempScaleY;
-      object.left = tempLeft;
-      object.top = tempTop;
-
-      if (render) {
-        object.setCoords();
-      }
-    });
-  }
 
   zoomCanvas(canvas, factor) {
     canvas.setHeight(canvas.getHeight() * factor);
     canvas.setWidth(canvas.getWidth() * factor);
     const objects = canvas.getObjects();
-    this.zoomObjects(objects, factor, true);
+    ObjectUtil.zoom(objects, factor);
   }
 
   renderPropertiesPanel() {
-    if (this.state.activePropType === 'text') {
+    const _currentActivePropType = this.state.activePropType;
+    if (_currentActivePropType === 'text') {
       return (
-        <TextProperties textProps={this.activeObject} updateTo={this.updateText.bind(this)}/>
+        <TextProperties
+          textProps={this.activeObject}
+          updateTo={this.updateText}
+        />
       );
     }
 
-    if (this.state.activePropType === 'image') {
+    if (_currentActivePropType === 'image') {
       return (
-        <ImageProperties imageObj={this.activeObject} updateTo={this.updateScalingStyle.bind(this)}/>
+        <ImageProperties
+          imageObj={this.activeObject}
+          updateTo={this.updateScalingStyle}
+        />
       );
     }
 
-    if (this.state.activePropType === 'video') {
+    if (_currentActivePropType === 'video') {
       return (
-        <VideoProperties updateTo={this.updateScalingStyle.bind(this)}
-                         videoObj={this.activeObject}/>
+        <VideoProperties
+          updateTo={this.updateScalingStyle}
+          videoObj={this.activeObject}
+        />
       );
     }
-    if (this.state.activePropType === 'website') {
+    if (_currentActivePropType === 'website') {
       return (
-        <WebProperties updateTo={this.updateWebsite.bind(this)}
-                       webObj={this.activeObject}/>
+        <WebProperties
+          updateTo={this.updateWebsite}
+          webObj={this.activeObject}
+        />
       );
     }
+    return null;
   }
 
   render() {
     return (
       <div className="app-container">
-        <div className="panel panel-info pull-left main-canvas-wrapper">
+        <div className="panel panel-default pull-left main-canvas-wrapper">
           <div className="panel-heading">
-            <button className="btn btn-primary"
-                    onClick={this.preview.bind(this)}>{this.state.isPreview ? 'Stop Preview' : 'Preview'}</button>
+            <button
+              className="btn btn-primary"
+              onClick={this.preview}
+            >{this.state.isPreview ? 'Stop Preview' : 'Preview'}</button>
           </div>
           <div className="panel-body">
             <canvas width="640" height="360" ref="mainCanvas"></canvas>
           </div>
         </div>
         <div className={this.state.isPreview ? 'hidden' : 'controller-container pull-left'}>
-          <div className="object-container panel panel-info">
+          <div className="object-container panel panel-default">
             <div className="panel-heading">Insert</div>
             <div className="panel-body">
-              <button className="btn btn-primary" onClick={this.showInputVideoDialog.bind(this)}>Video</button>
-              <button className="btn btn-primary" onClick={this.showInputImageDialog.bind(this)}>Image</button>
-              <button className="btn btn-primary" onClick={this.showInputWebsiteDialog.bind(this)}>Website</button>
-              <button className="btn btn-primary" onClick={this.clickAddText.bind(this)}>Text</button>
+              <button
+                className="btn btn-primary"
+                onClick={this.showInputVideoDialog}
+              >Video
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={this.showInputImageDialog}
+              >Image
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={this.showInputWebsiteDialog}
+              >Website
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={this.clickAddText}
+              >Text
+              </button>
             </div>
           </div>
-          <div className="object-container panel panel-info">
+          <div className="object-container panel panel-default">
             <div className="panel-heading">Control</div>
             <div className="panel-body">
-              <button className="btn btn-default" onClick={this.removeActiveObject.bind(this)}>Remove</button>
-              <button className="btn btn-default" onClick={this.clearCanvas.bind(this)}>Clear</button>
-              <button className="btn btn-primary" onClick={this.showInputTemplateNameDialog.bind(this)}>Save</button>
+              <button
+                className="btn btn-default"
+                onClick={this.removeActiveObject}
+              >Remove
+              </button>
+              <button
+                className="btn btn-default"
+                onClick={this.clearCanvas}
+              >Clear
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={this.showInputTemplateNameDialog}
+              >Save
+              </button>
             </div>
           </div>
           <div className="arrangement-container">
-            <div className="object-container panel panel-info">
+            <div className="object-container panel panel-default">
               <div className="panel-heading">Arrangement</div>
               <div className="panel-body">
-                {this.arrangementButtons.map((button) => {
+                {ARRANGEMENT_BUTTONS.map((button) => {
                   const classes = ['btn', 'btn-default', 'icon-button', button.className];
                   if (button.key === this.state.selectedArrangement) {
                     classes.push('active');
                   }
                   return (
-                    <button onClick={this.updateArrangement.bind(this, button.key)} key={button.key}
-                            className={classNames(...classes)} value={button.key}></button>
+                    <button
+                      onClick={() => this.updateArrangement(button.key)}
+                      key={button.key}
+                      className={classNames(...classes)} value={button.key}
+                    ></button>
                   );
                 })}
               </div>
             </div>
           </div>
           <div className="layer-order-container">
-            <div className="object-container panel panel-info">
+            <div className="object-container panel panel-default">
               <div className="panel-heading">Layer Order</div>
               <div className="panel-body">
-                <button className="btn btn-default icon-button bring-to-front-button"
-                        onClick={this.bringToFront.bind(this)}>
-                </button>
-                <button className="btn btn-default icon-button send-to-back-button"
-                        onClick={this.sendToBack.bind(this)}>
-                </button>
-                <button className="btn btn-default icon-button bring-forward-button"
-                        onClick={this.bringForward.bind(this)}>
-                </button>
-                <button className="btn btn-default icon-button send-backwards-button"
-                        onClick={this.sendBackWards.bind(this)}>
-                </button>
+                <button
+                  className="btn btn-default icon-button bring-to-front-button"
+                  onClick={this.bringToFront}
+                ></button>
+                <button
+                  className="btn btn-default icon-button send-to-back-button"
+                  onClick={this.sendToBack}
+                ></button>
+                <button
+                  className="btn btn-default icon-button bring-forward-button"
+                  onClick={this.bringForward}
+                ></button>
+                <button
+                  className="btn btn-default icon-button send-backwards-button"
+                  onClick={this.sendBackWards}
+                ></button>
               </div>
             </div>
           </div>
@@ -917,18 +816,31 @@ export default class TemplateBuilderApp extends React.Component {
             {this.renderPropertiesPanel()}
           </div>
         </div>
-        <InputVideoDialog show={this.state.showInputVideoDialog}
-                          done={this.doneInputVideo.bind(this)}
-                          onHide={this.hideInputVideoDialog.bind(this)}/>
-        <InputWebsiteDialog show={this.state.showInputWebsiteDialog}
-                            done={this.doneInputWebsite.bind(this)}
-                            onHide={this.hideInputWebsiteDialog.bind(this)}/>
-        <InputImageDialog show={this.state.showInputImageDialog}
-                          done={this.doneInputImage.bind(this)}
-                          onHide={this.hideInputImageDialog.bind(this)}/>
-        <InputTemplateNameDialog show={this.state.showInputTemplateNameDialog}
-                                 done={this.doneInputTemplateName.bind(this)}
-                                 onHide={this.hideInputTemplateNameDialog.bind(this)}/>
+        <InputVideoDialog
+          show={this.state.showInputVideoDialog}
+          done={this.doneInputVideo}
+          onHide={this.hideInputVideoDialog}
+        />
+        <InputWebsiteDialog
+          show={this.state.showInputWebsiteDialog}
+          done={this.doneInputWebsite}
+          onHide={this.hideInputWebsiteDialog}
+        />
+        <InputImageDialog
+          show={this.state.showInputImageDialog}
+          done={this.doneInputImage}
+          onHide={this.hideInputImageDialog}
+        />
+        <InputTemplateNameDialog
+          show={this.state.showInputTemplateNameDialog}
+          done={this.doneInputTemplateName}
+          onHide={this.hideInputTemplateNameDialog}
+        />
+        <div
+          className={this.state.isLoading ? classNames('main-loading-wrapper') : classNames('hide')}
+        >
+          <div className="loading-spinner"></div>
+        </div>
         <div className="clearfix"></div>
       </div>
     );

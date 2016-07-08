@@ -9,7 +9,7 @@ export default class TextProperties extends React.Component {
       fontSize: 10,
       italic: false,
       bold: false,
-      animation: ''
+      animation: '',
     };
     this.fonts = [
       'Times New Roman',

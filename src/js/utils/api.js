@@ -5,6 +5,7 @@ const $ = window.jQuery;
 
 const api = {
   _log: false,
+  _disableCache: true,
   extraOptions: {
     headers: {
       // 'request-id': Math.round(Math.random() * 1000000),
@@ -36,15 +37,14 @@ const api = {
       });
       this.log('Request sent: ', cacheKey, options);
       return $.ajax(options).then((response) => {
-        console.log(response, '112');
         cache.set(cacheKey, response);
-        this.log('Request cached: ' + cacheKey);
+        this.log(`Request cached:${cacheKey}`);
         return response;
       });
     };
 
-    if (disableCache) {
-      this.log('Request sent without cache: ' + cacheKey);
+    if (this._disableCache || disableCache) {
+      this.log(`Request sent without cache:${cacheKey}`);
       return ajax();
     }
     // Use cache  
@@ -83,13 +83,28 @@ const api = {
       contentType: false,
     });
   },
-  uploadPost(url, formData) {
+  uploadPost(url, formData, onProgress) {
     return $.ajax({
       url: API_END_POINT + url,
       type: 'POST',
       data: formData,
       processData: false,
       contentType: false,
+      xhr: () => {
+        const myXhr = $.ajaxSettings.xhr();
+        if (myXhr.upload && onProgress) {
+          myXhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+              const max = e.total;
+              const current = e.loaded;
+
+              const Percentage = (current * 100) / max;
+              onProgress(Math.floor(Percentage));
+            }
+          }, false);
+        }
+        return myXhr;
+      },
     });
   },
   clearCache(key) {
