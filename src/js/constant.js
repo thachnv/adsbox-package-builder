@@ -27,7 +27,7 @@ export const SCALING_STYLE_BUTTONS = [
 export const API = {
   UPLOAD: 'asset/media/upload',
   WEBPAGE_SCREENSHOT: 'asset/web',
-  TEMPLATE: 'content',
+  TEMPLATE: 'content_package',
   MEDIA: 'asset',
 };
 

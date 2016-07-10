@@ -6,6 +6,7 @@ import '../../bower_components/fabric.js/dist/fabric.js';
 import '../less/app.less';
 import '../index.html';
 import '../assets/video-player.svg';
+import '../env/env';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TemplateBuilderApp from './components/TemplateBuilderApp/TemplateBuilderApp.js';

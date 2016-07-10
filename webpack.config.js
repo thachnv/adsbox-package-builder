@@ -67,8 +67,12 @@ module.exports = {
     loaders: [
       {
         test: /\.js$/,
-        exclude: /(node_modules|bower_components)/,
+        exclude: /(node_modules|bower_components|env)/,
         loaders: jsLoaders,
+      },
+      {
+        test: /env/,
+        loader: 'file-loader?name=[path][name].[ext]',
       },
       {
         test: /\.png/,

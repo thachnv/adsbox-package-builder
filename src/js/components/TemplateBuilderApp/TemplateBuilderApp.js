@@ -43,6 +43,8 @@ export default class TemplateBuilderApp extends React.Component {
     // Canvas control methods
     this.clearCanvas = this.clearCanvas.bind(this);
     this.removeActiveObject = this.removeActiveObject.bind(this);
+    this.toHorizontal = this.toHorizontal.bind(this);
+    this.toVertical = this.toVertical.bind(this);
     this.showInputTemplateNameDialog = this.showInputTemplateNameDialog.bind(this);
 
     // Update properties methods
@@ -69,12 +71,13 @@ export default class TemplateBuilderApp extends React.Component {
 
   componentDidMount() {
     this.canvas = new fabric.Canvas(this.refs.mainCanvas, {
+      width: 640,
+      height: 360,
       preserveObjectStacking: true,
     });
     this.canvas.on('object:selected', this.getActiveObject.bind(this));
     // const id = window.selectedPackage;
     const id = parseUrlArgs(window.location.href);
-    console.log(id);
     if (id) {
       api.get(`${API.TEMPLATE}/${id}`).done((response) => {
         const objects = response.content.objects;
@@ -179,7 +182,8 @@ export default class TemplateBuilderApp extends React.Component {
     }
     if (arrangement === ARRANGEMENT.CENTER_MIDDLE) {
       ObjectUtil.fit(object, this.canvas.width, this.canvas.height);
-      object.center();
+      object.centerV();
+      object.centerH();
       // ObjectUtil.alignCenter(object, this.canvas.width);
       // ObjectUtil.alignMiddle(object, this.canvas.height);
     }
@@ -315,23 +319,19 @@ export default class TemplateBuilderApp extends React.Component {
     if (text) {
       _text = text;
     }
-    const defaultOptions = {
-      originX: 'center',
-      originY: 'center',
-    };
+    const defaultOptions = {};
     const textObject = new Text(_text, options || defaultOptions);
+    this.canvas.add(textObject);
     if (!options) {
       textObject.arrangement = ARRANGEMENT.CENTER_MIDDLE;
-      this.toCenter(textObject);
-      this.toMiddle(textObject);
+      textObject.center();
     }
     textObject.lockScalingX = true;
     textObject.lockScalingY = true;
-    textObject.setCoords();
-    this.canvas.add(textObject);
     if (index !== undefined) {
       this.canvas.moveTo(textObject, index);
     }
+    textObject.setCoords();
   }
 
   clickAddText() {
@@ -342,27 +342,20 @@ export default class TemplateBuilderApp extends React.Component {
     fabric.Image.fromURL(url, (image) => {
       const defaultOptions = {
         scalingStyle: SCALING_STYLES.RESET,
-        // originX: 'center',
-        // originY: 'center',
       };
       image.set(options || defaultOptions);
-
+      this.canvas.add(image);
       if (!options) {
         image.set('arrangement', ARRANGEMENT.CENTER_MIDDLE);
-        // ObjectUtil.alignMiddle(image, this.canvas.height);
-        // ObjectUtil.alignCenter(image, this.canvas.width);
-        // this.toCenter(image);
-        // this.toMiddle(image);
         image.center();
       }
       if (image.getWidth() > this.canvas.width || image.getHeight() > this.canvas.height) {
         this.fitObject(image);
       }
-      image.setCoords();
-      this.canvas.add(image);
       if (index !== undefined) {
         this.canvas.moveTo(image, index);
       }
+      image.setCoords();
     });
   }
 
@@ -384,25 +377,21 @@ export default class TemplateBuilderApp extends React.Component {
       videoElement.width = videoElement.videoWidth;
       videoElement.height = videoElement.videoHeight;
       const defaultOptions = {
-        // originX: 'center',
-        // originY: 'center',
         src: url,
       };
       const video = new Video(videoElement, options || defaultOptions);
+      this.canvas.add(video);
       if (!options) {
         video.arrangement = ARRANGEMENT.CENTER_MIDDLE;
-        // this.toCenter(video);
-        // this.toMiddle(video);
         video.center();
       }
-      video.setCoords();
       if (video.getWidth() > this.canvas.width || video.getHeight() > this.canvas.height) {
         this.fitObject(video);
       }
-      this.canvas.add(video);
       if (index !== undefined) {
         this.canvas.moveTo(video, index);
       }
+      video.setCoords();
     });
   }
 
@@ -411,23 +400,21 @@ export default class TemplateBuilderApp extends React.Component {
       const website = new Website(img);
       const defaultOptions = {
         scalingStyle: SCALING_STYLES.RESET,
-        originX: 'center',
-        originY: 'center',
         url,
       };
       website.set(options || defaultOptions);
+      this.canvas.add(website);
       if (!options) {
         website.arrangement = ARRANGEMENT.CENTER_MIDDLE;
-        this.toCenter(website);
-        this.toMiddle(website);
+        website.center();
       }
       if (website.getWidth() > this.canvas.width || website.getHeight() > this.canvas.height) {
         this.fitObject(website);
       }
-      this.canvas.add(website);
       if (index !== undefined) {
         this.canvas.moveTo(website, index);
       }
+      website.setCoords();
     });
   }
 
@@ -439,9 +426,8 @@ export default class TemplateBuilderApp extends React.Component {
         this.fullObject(object);
         break;
       case ARRANGEMENT.CENTER_MIDDLE:
-        this.toCenter(object);
-        this.toMiddle(object);
-        this.fillObject(object);
+        ObjectUtil.fill(object, this.canvas.width, this.canvas.height);
+        object.center();
         break;
       case ARRANGEMENT.MIDDLE_LEFT:
         ObjectUtil.fill(object, this.canvas.width / 2, this.canvas.height);
@@ -642,9 +628,9 @@ export default class TemplateBuilderApp extends React.Component {
 
   doneInputTemplateName(name) {
     const objects = this.canvas.toJSON().objects;
-    this.zoomObjects(objects, 3, false);
+    ObjectUtil.zoom(objects, 3);
     const requestData = {
-      content_name: name,
+      content_package_name: name,
       objects,
     };
 
@@ -662,12 +648,63 @@ export default class TemplateBuilderApp extends React.Component {
     });
   }
 
+  toHorizontal() {
+    this.canvas.setWidth(360);
+    this.canvas.setHeight(640);
+    this.canvas.renderAll();
+  }
+
+  toVertical() {
+    this.canvas.setWidth(640);
+    this.canvas.setHeight(360);
+    this.canvas.renderAll();
+  }
 
   zoomCanvas(canvas, factor) {
     canvas.setHeight(canvas.getHeight() * factor);
     canvas.setWidth(canvas.getWidth() * factor);
     const objects = canvas.getObjects();
     ObjectUtil.zoom(objects, factor);
+  }
+
+  renderDialogs() {
+    if (this.state.showInputVideoDialog) {
+      return (
+        <InputVideoDialog
+          show={this.state.showInputVideoDialog}
+          done={this.doneInputVideo}
+          onHide={this.hideInputVideoDialog}
+        />
+      );
+    }
+    if (this.state.showInputImageDialog) {
+      return (
+        <InputImageDialog
+          show={this.state.showInputImageDialog}
+          done={this.doneInputImage}
+          onHide={this.hideInputImageDialog}
+        />
+      );
+    }
+    if (this.state.showInputTemplateNameDialog) {
+      return (
+        <InputTemplateNameDialog
+          show={this.state.showInputTemplateNameDialog}
+          done={this.doneInputTemplateName}
+          onHide={this.hideInputTemplateNameDialog}
+        />
+      );
+    }
+    if (this.state.showInputWebsiteDialog) {
+      return (
+        <InputWebsiteDialog
+          show={this.state.showInputWebsiteDialog}
+          done={this.doneInputWebsite}
+          onHide={this.hideInputWebsiteDialog}
+        />
+      );
+    }
+    return null;
   }
 
   renderPropertiesPanel() {
@@ -718,6 +755,16 @@ export default class TemplateBuilderApp extends React.Component {
               className="btn btn-primary"
               onClick={this.preview}
             >{this.state.isPreview ? 'Stop Preview' : 'Preview'}</button>
+            <button
+              className="btn btn-default"
+              onClick={this.toVertical}
+            >Vertical
+            </button>
+            <button
+              className="btn btn-default"
+              onClick={this.toHorizontal}
+            >Horizontal
+            </button>
           </div>
           <div className="panel-body">
             <canvas width="640" height="360" ref="mainCanvas"></canvas>
@@ -816,26 +863,7 @@ export default class TemplateBuilderApp extends React.Component {
             {this.renderPropertiesPanel()}
           </div>
         </div>
-        <InputVideoDialog
-          show={this.state.showInputVideoDialog}
-          done={this.doneInputVideo}
-          onHide={this.hideInputVideoDialog}
-        />
-        <InputWebsiteDialog
-          show={this.state.showInputWebsiteDialog}
-          done={this.doneInputWebsite}
-          onHide={this.hideInputWebsiteDialog}
-        />
-        <InputImageDialog
-          show={this.state.showInputImageDialog}
-          done={this.doneInputImage}
-          onHide={this.hideInputImageDialog}
-        />
-        <InputTemplateNameDialog
-          show={this.state.showInputTemplateNameDialog}
-          done={this.doneInputTemplateName}
-          onHide={this.hideInputTemplateNameDialog}
-        />
+        {this.renderDialogs()}
         <div
           className={this.state.isLoading ? classNames('main-loading-wrapper') : classNames('hide')}
         >

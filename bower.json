@@ -15,7 +15,7 @@
     "tests"
   ],
   "dependencies": {
-    "fabric.js": "fabric#^1.6.2",
+    "fabric.js": "fabric#1.6.2",
     "bootstrap": "^3.3.6",
     "jquery": "^2.2.4",
     "notifyjs": "^0.4.2"

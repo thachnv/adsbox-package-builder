@@ -1,0 +1,1 @@
+window.API_END_POINT = 'http://go.adsbox.io/api/v2/';

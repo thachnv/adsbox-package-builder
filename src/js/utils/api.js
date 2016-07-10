@@ -1,6 +1,6 @@
 // import config from '../business/config.js';
 import cache from './request-cache';
-var API_END_POINT = 'http://go.adsbox.io/api/v2/';
+const API_END_POINT = window.API_END_POINT;
 const $ = window.jQuery;
 
 const api = {

@@ -16,39 +16,18 @@ export default class UploadDialog extends React.Component {
       uploadProgress: 0,
     };
     this.onUploadProgress = this.onUploadProgress.bind(this);
-  }
-
-  change() {
-    const reader = new FileReader();
-    const file = this.refs.file.files[0];
-
-    this.setState({
-      selectedFile: file,
-    });
-
-    reader.onload = (e) => {
-      const blobData = e.target.result;
-      this.refs.image.src = blobData;
-    };
-
-    reader.readAsDataURL(file);
-  }
-
-  changeUrl(e) {
-    this.setState({
-      url: e.target.value,
-    });
-  }
-
-  selectTab(tab) {
-    this.setState({
-      currentActiveTab: tab,
-    });
+    this.done = this.done.bind(this);
+    this.changeUrl = this.changeUrl.bind(this);
+    this.change = this.change.bind(this);
   }
 
   onUploadProgress(progress) {
+    let _progress = progress;
+    if (this.state.isLoading && progress >= 99) {
+      _progress = 99;
+    }
     this.setState({
-      uploadProgress: progress,
+      uploadProgress: _progress,
     });
   }
 
@@ -66,7 +45,10 @@ export default class UploadDialog extends React.Component {
             this.props.done(image.url);
           })
           .fail((error) => {
-            console.log(error);
+            $.notify(error.message || 'Fail to upload image', {
+              className: 'error',
+              elementPosition: 'bottom right',
+            });
           })
           .always(() => {
             this.setState({
@@ -81,6 +63,33 @@ export default class UploadDialog extends React.Component {
       MediaActions.removeSelectedMedia();
       this.props.done(imageUrl);
     }
+  }
+
+  change() {
+    const reader = new FileReader();
+    const file = this.refs.file.files[0];
+
+    this.setState({
+      selectedFile: file,
+    });
+
+    reader.onload = (e) => {
+      this.refs.image.src = e.target.result;
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  changeUrl(e) {
+    this.setState({
+      url: e.target.value,
+    });
+  }
+
+  selectTab(tab) {
+    this.setState({
+      currentActiveTab: tab,
+    });
   }
 
   renderNavTabs() {
@@ -124,16 +133,22 @@ export default class UploadDialog extends React.Component {
         <div className="form-group">
           <label className="control-label col-xs-2">URL</label>
           <div className="col-xs-10">
-            <input className="form-control" value={this.state.url}
-                   placeholder="Input Image URL" onChange={this.changeUrl.bind(this)}
-                   ref="inputUrl" />
+            <input
+              className="form-control" value={this.state.url}
+              placeholder="Input Image URL" onChange={this.changeUrl}
+              ref="inputUrl"
+            />
           </div>
         </div>
         <div className="form-group">
           <label className="control-label col-xs-2">Upload</label>
           <div className="col-xs-10 file-upload-control">
             <label className="btn btn-primary btn-file">
-              Browse <input type="file" ref="file" style={{display: 'none'}} onChange={this.change.bind(this)} />
+              Browse
+              <input
+                type="file" ref="file" style={{ display: 'none' }}
+                onChange={this.change}
+              />
             </label>
           </div>
           <div className="col-xs-offset-2 col-xs-10 preview-before-upload">
@@ -170,7 +185,7 @@ export default class UploadDialog extends React.Component {
         <Modal.Footer>
           <button
             className="btn btn-primary" disabled={this.state.isLoading}
-            onClick={this.done.bind(this)}
+            onClick={this.done}
           >Ok
           </button>
         </Modal.Footer>

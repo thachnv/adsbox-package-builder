@@ -1,6 +1,6 @@
 import React from 'react';
 import Validator from '../../utils/Validator';
-import {INPUT_WEBSITE_URL_FORM_VALIDATOR} from '../../constant';
+import { INPUT_WEBSITE_URL_FORM_VALIDATOR, SCALING_STYLE_BUTTONS } from '../../constant';
 export default class WebProperties extends React.Component {
   constructor() {
     super();
@@ -33,6 +33,14 @@ export default class WebProperties extends React.Component {
     };
   }
 
+  selectScalingStyle(e) {
+    const value = e.target.value;
+    this.setState({
+      scalingStyle: value,
+    });
+    this.props.updateTo(value);
+  }
+
   render() {
     return (
       <div className="panel panel-info">
@@ -44,7 +52,20 @@ export default class WebProperties extends React.Component {
                 <label className="control-label col-xs-2">URL</label>
                 <div className="col-xs-10">
                   <input type="text" className="form-control" name="websiteUrl"
-                         value={this.state.url} onChange={this.onChangeUrl.bind(this)}/>
+                         value={this.state.url} onChange={this.onChangeUrl.bind(this)} />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="control-label col-xs-3">Scaling Style</label>
+                <div className="col-xs-9">
+                  {SCALING_STYLE_BUTTONS.map((button) => {
+                    const classes = ['btn', 'btn-default'];
+                    if (button.key === this.state.scalingStyle) {
+                      classes.push('active');
+                    }
+                    return (<button type="button" onClick={this.selectScalingStyle.bind(this)} key={button.key}
+                                    className={classNames(...classes)} value={button.key}>{button.label}</button>);
+                  })}
                 </div>
               </div>
             </form>
