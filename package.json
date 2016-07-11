@@ -1,6 +1,6 @@
 {
   "name": "adsbox-package-builder",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A template builder using fabric",
   "main": "src/js/app.js",
   "scripts": {
