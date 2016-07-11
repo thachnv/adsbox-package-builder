@@ -1,5 +1,5 @@
 {
-  "name": "template-builder",
+  "name": "adsbox-package-builder",
   "version": "1.1.0",
   "description": "A template builder using fabric",
   "main": "src/js/app.js",
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thachnv/template-builder.git"
+    "url": "git+https://github.com/thachnv/adsbox-package-builder.git"
   },
   "author": "Thach Nguyen",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/thachnv/template-builder/issues"
+    "url": "https://github.com/thachnv/adsbox-package-builder/issues"
   },
-  "homepage": "https://github.com/thachnv/template-builder#readme",
+  "homepage": "https://github.com/thachnv/adsbox-package-builder#readme",
   "babel": {
     "presets": [
       "es2015",
