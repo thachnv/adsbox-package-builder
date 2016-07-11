@@ -51,7 +51,7 @@ export default class TemplateBuilderApp extends React.Component {
     this.removeActiveObject = this.removeActiveObject.bind(this);
     this.toHorizontal = this.toHorizontal.bind(this);
     this.toVertical = this.toVertical.bind(this);
-    this.showInputTemplateNameDialog = this.showInputTemplateNameDialog.bind(this);
+    this.clickSave = this.clickSave.bind(this);
 
     // Update properties methods
     this.updateText = this.updateText.bind(this);
@@ -89,6 +89,9 @@ export default class TemplateBuilderApp extends React.Component {
         const objects = response.content.objects;
         ObjectUtil.zoom(objects, 1 / 3);
         this.redraw(objects);
+        this.setState({
+          editingPackageId: id,
+        });
       });
     }
   }
@@ -631,6 +634,14 @@ export default class TemplateBuilderApp extends React.Component {
     });
   }
 
+  clickSave() {
+    if (this.state.editingPackageId) {
+      this.updatePackage(this.state.editingPackageId);
+    } else {
+      this.showInputTemplateNameDialog();
+    }
+  }
+
   showInputTemplateNameDialog() {
     this.setState({
       showInputTemplateNameDialog: true,
@@ -647,6 +658,28 @@ export default class TemplateBuilderApp extends React.Component {
     };
 
     api.post(API.TEMPLATE, requestData).done(() => {
+      this.hideInputTemplateNameDialog();
+      $.notify('Save template success', {
+        className: 'success',
+        elementPosition: 'bottom right',
+      });
+    }).fail(error => {
+      $.notify(error.message || 'Fail to save template', {
+        className: 'error',
+        elementPosition: 'bottom right',
+      });
+    });
+  }
+
+  updatePackage(id) {
+    const objects = this.canvas.toJSON().objects;
+    ObjectUtil.zoom(objects, 3);
+    const requestData = {
+      objects,
+      orientation: this.state.orientation,
+    };
+
+    api.put(`${API.TEMPLATE}/${id}`, requestData).done(() => {
       this.hideInputTemplateNameDialog();
       $.notify('Save template success', {
         className: 'success',
@@ -838,7 +871,7 @@ export default class TemplateBuilderApp extends React.Component {
               </button>
               <button
                 className="btn btn-primary"
-                onClick={this.showInputTemplateNameDialog}
+                onClick={this.clickSave}
               >Save
               </button>
             </div>
