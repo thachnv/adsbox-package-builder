@@ -1,6 +1,7 @@
 import React from 'react';
 import Validator from '../../utils/Validator';
 import { INPUT_WEBSITE_URL_FORM_VALIDATOR, SCALING_STYLE_BUTTONS } from '../../constant';
+import classNames from 'classnames';
 export default class WebProperties extends React.Component {
   constructor() {
     super();
@@ -23,7 +24,7 @@ export default class WebProperties extends React.Component {
       this.setState({
         url: url,
       });
-      this.props.updateTo(url);
+      this.props.updateTo('url', url);
     }
   }
 
@@ -38,7 +39,7 @@ export default class WebProperties extends React.Component {
     this.setState({
       scalingStyle: value,
     });
-    this.props.updateTo(value);
+    this.props.updateTo('scalingStyle', value);
   }
 
   render() {

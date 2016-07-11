@@ -22,6 +22,11 @@ function parseUrlArgs(href) {
   }
   return null;
 }
+
+const CANVAS_ORIENTATION = {
+  PORTRAIT: 'PORTRAIT',
+  LANDSCAPE: 'LANDSCAPE',
+};
 export default class TemplateBuilderApp extends React.Component {
   constructor() {
     super();
@@ -31,6 +36,7 @@ export default class TemplateBuilderApp extends React.Component {
       activePropType: null,
       selectedArrangement: ARRANGEMENT.CENTER_MIDDLE,
       isPreview: false,
+      orientation: CANVAS_ORIENTATION.LANDSCAPE,
     };
     this.activeObject = null;
 
@@ -149,8 +155,11 @@ export default class TemplateBuilderApp extends React.Component {
     this.setActiveProp(propName, value);
   }
 
-  updateWebsite(value) {
-    this.setActiveProp('url', value);
+  updateWebsite(key, value) {
+    this.setActiveProp(key, value);
+    if (key === 'scalingStyle') {
+      this.updateScalingStyle(value);
+    }
   }
 
   fitObject(object) {
@@ -251,16 +260,18 @@ export default class TemplateBuilderApp extends React.Component {
     }
     if (arrangement === ARRANGEMENT.CENTER_MIDDLE) {
       ObjectUtil.full(object, this.canvas.width, this.canvas.height);
-      ObjectUtil.alignCenter(object, this.canvas.width);
-      ObjectUtil.alignMiddle(object, this.canvas.height);
+      // ObjectUtil.alignCenter(object, this.canvas.width);
+      // ObjectUtil.alignMiddle(object, this.canvas.height);
+      object.center();
     }
     if (arrangement === ARRANGEMENT.FULL_SCREEN) {
       const scaleX = this.canvas.width / object.width;
       const scaleY = this.canvas.height / object.height;
       object.set('scaleX', scaleX);
       object.set('scaleY', scaleY);
-      this.toCenter(object);
-      this.toMiddle(object);
+      object.center();
+      // this.toCenter(object);
+      // this.toMiddle(object);
     }
   }
 
@@ -632,6 +643,7 @@ export default class TemplateBuilderApp extends React.Component {
     const requestData = {
       content_package_name: name,
       objects,
+      orientation: this.state.orientation,
     };
 
     api.post(API.TEMPLATE, requestData).done(() => {
@@ -657,6 +669,21 @@ export default class TemplateBuilderApp extends React.Component {
   toVertical() {
     this.canvas.setWidth(640);
     this.canvas.setHeight(360);
+    this.canvas.renderAll();
+  }
+
+  changeOrientation(orientation) {
+    this.setState({
+      orientation,
+    });
+    if (orientation === CANVAS_ORIENTATION.LANDSCAPE) {
+      this.canvas.setWidth(640);
+      this.canvas.setHeight(360);
+    }
+    if (orientation === CANVAS_ORIENTATION.PORTRAIT) {
+      this.canvas.setWidth(360);
+      this.canvas.setHeight(640);
+    }
     this.canvas.renderAll();
   }
 
@@ -756,15 +783,15 @@ export default class TemplateBuilderApp extends React.Component {
               onClick={this.preview}
             >{this.state.isPreview ? 'Stop Preview' : 'Preview'}</button>
             <button
-              className="btn btn-default"
-              onClick={this.toVertical}
-            >Vertical
-            </button>
+              className={(this.state.isPreview
+              || this.state.orientation === CANVAS_ORIENTATION.LANDSCAPE) ? 'hide' : 'btn btn-default icon-button landscape-button'}
+              onClick={() => this.changeOrientation(CANVAS_ORIENTATION.LANDSCAPE)}
+            ></button>
             <button
-              className="btn btn-default"
-              onClick={this.toHorizontal}
-            >Horizontal
-            </button>
+              className={(this.state.isPreview
+              || this.state.orientation === CANVAS_ORIENTATION.PORTRAIT) ? 'hide' : 'btn btn-default icon-button portrait-button'}
+              onClick={() => this.changeOrientation(CANVAS_ORIENTATION.PORTRAIT)}
+            ></button>
           </div>
           <div className="panel-body">
             <canvas width="640" height="360" ref="mainCanvas"></canvas>

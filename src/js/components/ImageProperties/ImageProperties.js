@@ -32,6 +32,14 @@ export default class ImageProperties extends React.Component {
     this.props.updateTo(value);
   }
 
+  selectScalingStyle(e) {
+    const value = e.target.value;
+    this.setState({
+      scalingStyle: value,
+    });
+    this.props.updateTo(value);
+  }
+
   render() {
     return (
       <div className="panel panel-info">
