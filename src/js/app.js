@@ -3,6 +3,7 @@ import '!script!../../bower_components/jquery/dist/jquery.js';
 import '!script!../../bower_components/bootstrap/dist/js/bootstrap.js';
 import '!script!../../bower_components/notifyjs/dist/notify.js';
 import '../../bower_components/fabric.js/dist/fabric.js';
+import '../../src/js/third-party/fabric';
 import '../less/app.less';
 import '../index.html';
 import '../assets/video-player.svg';

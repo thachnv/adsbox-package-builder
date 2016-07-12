@@ -346,6 +346,7 @@ export default class TemplateBuilderApp extends React.Component {
       this.canvas.moveTo(textObject, index);
     }
     textObject.setCoords();
+    this.canvas.renderAll();
   }
 
   clickAddText() {
@@ -370,6 +371,7 @@ export default class TemplateBuilderApp extends React.Component {
         this.canvas.moveTo(image, index);
       }
       image.setCoords();
+      this.canvas.renderAll();
     });
   }
 
@@ -406,6 +408,7 @@ export default class TemplateBuilderApp extends React.Component {
         this.canvas.moveTo(video, index);
       }
       video.setCoords();
+      this.canvas.renderAll();
     });
   }
 
@@ -429,6 +432,7 @@ export default class TemplateBuilderApp extends React.Component {
         this.canvas.moveTo(website, index);
       }
       website.setCoords();
+      this.canvas.renderAll();
     });
   }
 
