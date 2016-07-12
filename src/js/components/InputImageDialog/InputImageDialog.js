@@ -131,16 +131,6 @@ export default class UploadDialog extends React.Component {
     return (
       <div className="form-horizontal">
         <div className="form-group">
-          <label className="control-label col-xs-2">URL</label>
-          <div className="col-xs-10">
-            <input
-              className="form-control" value={this.state.url}
-              placeholder="Input Image URL" onChange={this.changeUrl}
-              ref="inputUrl"
-            />
-          </div>
-        </div>
-        <div className="form-group">
           <label className="control-label col-xs-2">Upload</label>
           <div className="col-xs-10 file-upload-control">
             <label className="btn btn-primary btn-file">
@@ -168,7 +158,7 @@ export default class UploadDialog extends React.Component {
         backdrop={this.state.isLoading ? 'static' : true}
       >
         <Modal.Header closeButton>
-          <Modal.Title>Input URL</Modal.Title>
+          <Modal.Title>Input Image</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {this.renderNavTabs()}

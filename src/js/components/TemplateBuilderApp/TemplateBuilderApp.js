@@ -358,7 +358,10 @@ export default class TemplateBuilderApp extends React.Component {
       const defaultOptions = {
         scalingStyle: SCALING_STYLES.RESET,
       };
-      image.set(options || defaultOptions);
+
+      let _options = options || defaultOptions;
+      // _options.crossOrigin = 'Anonymous';
+      image.set(_options);
       this.canvas.add(image);
       if (!options) {
         image.set('arrangement', ARRANGEMENT.CENTER_MIDDLE);
@@ -661,18 +664,46 @@ export default class TemplateBuilderApp extends React.Component {
       orientation: this.state.orientation,
     };
 
-    api.post(API.TEMPLATE, requestData).done(() => {
-      this.hideInputTemplateNameDialog();
-      $.notify('Save template success', {
-        className: 'success',
-        elementPosition: 'bottom right',
-      });
-    }).fail(error => {
-      $.notify(error.message || 'Fail to save template', {
-        className: 'error',
-        elementPosition: 'bottom right',
-      });
-    });
+    // api.post(API.TEMPLATE, requestData).done(() => {
+    //   this.hideInputTemplateNameDialog();
+    //   $.notify('Save template success', {
+    //     className: 'success',
+    //     elementPosition: 'bottom right',
+    //   });
+    // }).fail(error => {
+    //   $.notify(error.message || 'Fail to save template', {
+    //     className: 'error',
+    //     elementPosition: 'bottom right',
+    //   });
+    // });
+    var blobBin = atob(this.canvas.toDataURL({ format: 'png' }).split(',')[1]);
+    var array = [];
+    for (var i = 0; i < blobBin.length; i++) {
+      array.push(blobBin.charCodeAt(i));
+    }
+    var file = new Blob([new Uint8Array(array)], { type: 'image/png' });
+
+    const data = new FormData();
+    data.append('uploadfile', file, 'myimage.png');
+    data.append('content_package_name', name);
+    data.append('objects', JSON.stringify(objects));
+    data.append('orientation', this.state.orientation);
+    data.append('background', "");
+
+    api.uploadPost(API.TEMPLATE_THUMBNAIL, data)
+      .done(() => {
+        this.hideInputTemplateNameDialog();
+        $.notify('Save template success', {
+          className: 'success',
+          elementPosition: 'bottom right',
+        });
+      })
+      .fail((error) => {
+        $.notify(error.message || 'Fail to save template', {
+          className: 'error',
+          elementPosition: 'bottom right',
+        });
+      })
   }
 
   updatePackage(id) {
@@ -847,11 +878,6 @@ export default class TemplateBuilderApp extends React.Component {
                 className="btn btn-primary"
                 onClick={this.showInputImageDialog}
               >Image
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={this.showInputWebsiteDialog}
-              >Website
               </button>
               <button
                 className="btn btn-primary"

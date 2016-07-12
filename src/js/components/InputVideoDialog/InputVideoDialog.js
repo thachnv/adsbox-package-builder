@@ -146,7 +146,7 @@ export default class InputVideoDialog extends React.Component {
         backdrop={this.state.isLoading ? 'static' : true}
       >
         <Modal.Header closeButton={!this.state.isLoading}>
-          <Modal.Title>Input URL</Modal.Title>
+          <Modal.Title>Input Video</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {this.renderNavTabs()}

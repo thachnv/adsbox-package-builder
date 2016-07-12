@@ -28,6 +28,7 @@ export const API = {
   UPLOAD: 'asset/media/upload',
   WEBPAGE_SCREENSHOT: 'asset/web',
   TEMPLATE: 'content_package',
+  TEMPLATE_THUMBNAIL: 'content_package/create_with_thumbnail',
   MEDIA: 'asset',
 };
 
